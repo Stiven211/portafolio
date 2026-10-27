@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stiven · Portafolio de producto y desarrollo web</title>
+<meta name="description" content="Portafolio de Stiven: sitios institucionales, portales educativos y landings de negocio. Next.js, TypeScript y Supabase en producción.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%238b6cff'/%3E%3Cstop offset='1' stop-color='%233ee6c4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Ctext x='32' y='44' font-family='Arial' font-size='36' font-weight='700' fill='%2306070b' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#06070b;
+  --card:rgba(255,255,255,.035);
+  --line:rgba(255,255,255,.09);
+  --line-2:rgba(255,255,255,.16);
+  --text:#f3f4f8;
+  --muted:#99a0b2;
+  --muted-2:#6f768a;
+  --violet:#8b6cff;
+  --mint:#3ee6c4;
+  --font-d:"Sora",-apple-system,"Segoe UI",sans-serif;
+  --font-b:"Inter",-apple-system,"Segoe UI",sans-serif;
+  --r:20px;
+  --max:1180px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--font-b);
+  background:var(--ink);
+  color:var(--text);
+  line-height:1.6;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.032) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.032) 1px,transparent 1px);
+  background-size:72px 72px;
+  -webkit-mask-image:radial-gradient(ellipse 90% 65% at 50% -5%,#000 10%,transparent 72%);
+  mask-image:radial-gradient(ellipse 90% 65% at 50% -5%,#000 10%,transparent 72%);
+  pointer-events:none;
+  z-index:0;
+}
+.orb{
+  position:fixed;
+  border-radius:50%;
+  filter:blur(110px);
+  opacity:.5;
+  pointer-events:none;
+  z-index:0;
+}
+.orb-a{width:620px;height:620px;top:-280px;left:-160px;background:radial-gradient(circle,#4b2cff,transparent 68%)}
+.orb-b{width:560px;height:560px;top:38%;right:-260px;background:radial-gradient(circle,#0f8f7a,transparent 68%);opacity:.38}
+.orb-c{width:480px;height:480px;bottom:-260px;left:32%;background:radial-gradient(circle,#8b6cff,transparent 70%);opacity:.22}
+main,header,footer{position:relative;z-index:1}
+a{color:inherit;text-decoration:none}
+img,svg{display:block}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+::selection{background:var(--violet);color:#fff}
+:focus-visible{outline:2px solid var(--mint);outline-offset:3px;border-radius:6px}
+.wrap{width:100%;max-width:var(--max);margin:0 auto;padding:0 24px}
+
+.site-header{
+  position:fixed;
+  top:0;left:0;right:0;
+  z-index:50;
+  transition:background .35s ease,border-color .35s ease,backdrop-filter .35s ease;
+  border-bottom:1px solid transparent;
+}
+.site-header.scrolled{
+  background:rgba(6,7,11,.74);
+  -webkit-backdrop-filter:blur(18px);
+  backdrop-filter:blur(18px);
+  border-bottom-color:var(--line);
+}
+.header-inner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  height:74px;
+  gap:24px;
+}
+.brand{display:flex;align-items:center;gap:11px;font-family:var(--font-d);font-weight:600;letter-spacing:-.01em}
+.brand-mark{
+  width:34px;height:34px;
+  display:grid;place-items:center;
+  border-radius:10px;
+  background:linear-gradient(135deg,var(--violet),var(--mint));
+  color:#06070b;
+  font-size:17px;
+  font-weight:700;
+  box-shadow:0 6px 22px rgba(139,108,255,.35);
+}
+.brand small{display:block;font-family:var(--font-b);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2);font-weight:500;line-height:1}
+.brand strong{font-size:15px;line-height:1.35;font-weight:600}
+.nav{display:flex;align-items:center;gap:30px;font-size:13.5px;color:var(--muted)}
+.nav a{position:relative;transition:color .2s ease}
+.nav a::after{content:"";position:absolute;left:0;bottom:-6px;width:0;height:1px;background:var(--mint);transition:width .25s ease}
+.nav a:hover{color:var(--text)}
+.nav a:hover::after{width:100%}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  height:44px;padding:0 20px;
+  border-radius:999px;
+  font-size:13.5px;font-weight:600;
+  letter-spacing:.01em;
+  white-space:nowrap;
+  transition:transform .2s ease,background .2s ease,border-color .2s ease,box-shadow .2s ease;
+}
+.btn svg{width:15px;height:15px}
+.btn-primary{background:var(--text);color:#06070b;box-shadow:0 8px 26px rgba(255,255,255,.12)}
+.btn-primary:hover{transform:translateY(-2px);background:#fff;box-shadow:0 12px 34px rgba(255,255,255,.2)}
+.btn-ghost{border:1px solid var(--line-2);background:rgba(255,255,255,.03);color:var(--text)}
+.btn-ghost:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.32);background:rgba(255,255,255,.07)}
+.btn-sm{height:38px;padding:0 16px;font-size:12.5px}
+.header-cta{display:inline-flex}
+
+.hero{padding:150px 0 70px;position:relative}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:9px;
+  font-size:11.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:#c7cbd8;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.03);
+  border-radius:999px;
+  padding:7px 13px;
+}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 4px rgba(62,230,196,.14);animation:pulse-dot 2.6s ease-out infinite}
+@keyframes pulse-dot{0%{box-shadow:0 0 0 0 rgba(62,230,196,.35)}70%{box-shadow:0 0 0 7px rgba(62,230,196,0)}100%{box-shadow:0 0 0 0 rgba(62,230,196,0)}}
+.hero h1{
+  font-family:var(--font-d);
+  font-size:clamp(2.55rem,5.1vw,4.5rem);
+  line-height:1.02;
+  letter-spacing:-.045em;
+  font-weight:600;
+  margin:22px 0 20px;
+}
+.grad{
+  background:linear-gradient(100deg,#b7a6ff 0%,#8b6cff 34%,#3ee6c4 78%,#8ffbe4 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+.hero-lead{font-size:clamp(15px,1.35vw,17px);color:var(--muted);max-width:520px;line-height:1.7}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.hero-meta{
+  display:flex;flex-wrap:wrap;gap:20px;
+  margin-top:38px;padding-top:26px;
+  border-top:1px solid var(--line);
+}
+.hero-meta div{display:flex;flex-direction:column;gap:2px;min-width:92px}
+.hero-meta b{font-family:var(--font-d);font-size:23px;font-weight:600;letter-spacing:-.02em;line-height:1.2}
+.hero-meta span{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted-2);font-weight:500}
+
+.hero-visual{position:relative;perspective:1200px}
+.glow{position:absolute;inset:8% 4%;background:radial-gradient(circle at 60% 30%,rgba(139,108,255,.4),transparent 65%);filter:blur(50px);z-index:0}
+.hw{
+  position:relative;z-index:1;
+  border-radius:18px;
+  border:1px solid var(--line-2);
+  background:linear-gradient(165deg,rgba(22,24,36,.96),rgba(9,10,16,.98));
+  box-shadow:0 40px 90px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.08);
+  overflow:hidden;
+  transform:rotateX(2deg) rotateY(-3deg);
+  transition:transform .5s ease;
+}
+.hero-visual:hover .hw{transform:rotateX(0) rotateY(0) translateY(-3px)}
+.hw-bar{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 14px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.025);
+}
+.dots{display:flex;gap:5px}
+.dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.16)}
+.dots i:first-child{background:#ff5f57}
+.dots i:nth-child(2){background:#febc2e}
+.dots i:nth-child(3){background:#28c840}
+.hw-url{
+  font-size:10px;color:var(--muted-2);
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:6px;
+  padding:3px 10px;
+  letter-spacing:.03em;
+}
+.hw-body{display:grid;grid-template-columns:64px 1fr;min-height:320px}
+.hw-side{
+  border-right:1px solid rgba(255,255,255,.06);
+  padding:16px 12px;
+  display:flex;flex-direction:column;gap:11px;
+  background:rgba(0,0,0,.18);
+}
+.hw-logo{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--violet),var(--mint));margin-bottom:10px}
+.hw-nav{height:7px;border-radius:4px;background:rgba(255,255,255,.09)}
+.hw-nav.active{background:rgba(139,108,255,.55)}
+.hw-nav.mt{margin-top:auto}
+.hw-main{padding:20px 20px 18px;display:flex;flex-direction:column;gap:16px}
+.hw-head{display:flex;align-items:center;justify-content:space-between}
+.hw-kicker{display:block;width:44px;height:6px;border-radius:4px;background:rgba(62,230,196,.55);margin-bottom:8px}
+.hw-title{display:block;width:150px;height:12px;border-radius:5px;background:rgba(255,255,255,.82)}
+.hw-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#2a2d3f,#151724);border:1px solid rgba(255,255,255,.1)}
+.hw-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.hw-stats div{
+  border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.035);
+  border-radius:10px;
+  padding:10px 11px;
+  display:flex;flex-direction:column;gap:2px;
+}
+.hw-stats b{font-family:var(--font-d);font-size:19px;line-height:1.15;letter-spacing:-.02em}
+.hw-stats span{font-size:8.5px;color:var(--muted-2);letter-spacing:.08em;text-transform:uppercase}
+.hw-chart{
+  display:flex;align-items:flex-end;gap:6px;
+  height:92px;
+  padding:12px;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:10px;
+  background:rgba(255,255,255,.025);
+}
+.hw-chart span{
+  flex:1;height:var(--h);min-height:8px;
+  border-radius:3px 3px 2px 2px;
+  background:linear-gradient(180deg,rgba(139,108,255,.95),rgba(139,108,255,.28));
+}
+.hw-chart span:nth-child(3n){background:linear-gradient(180deg,rgba(62,230,196,.9),rgba(62,230,196,.22))}
+.hw-rows{display:flex;flex-direction:column;gap:8px}
+.hw-rows span{height:7px;border-radius:4px;background:rgba(255,255,255,.075)}
+.hw-rows span:nth-child(1){width:92%}
+.hw-rows span:nth-child(2){width:74%}
+.hw-rows span:nth-child(3){width:83%}
+.float-card{
+  position:absolute;z-index:2;
+  display:flex;align-items:center;gap:11px;
+  padding:12px 15px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.13);
+  background:rgba(14,16,24,.86);
+  -webkit-backdrop-filter:blur(14px);
+  backdrop-filter:blur(14px);
+  box-shadow:0 18px 40px rgba(0,0,0,.5);
+  animation:float 7s ease-in-out infinite;
+}
+.float-card b{display:block;font-family:var(--font-d);font-size:12.5px;font-weight:600;letter-spacing:-.01em;line-height:1.35}
+.float-card small{display:block;font-size:10px;color:var(--muted-2);letter-spacing:.03em}
+.float-card--live{left:-26px;bottom:44px}
+.float-card--stack{right:-18px;top:34px;animation-delay:-3.4s}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 4px rgba(62,230,196,.13)}
+.fc-icon{
+  width:30px;height:30px;border-radius:9px;
+  display:grid;place-items:center;
+  font-size:9.5px;font-weight:700;letter-spacing:.03em;
+  color:#06070b;
+  background:linear-gradient(135deg,#7fa7ff,#8b6cff);
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+
+.marquee{
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  padding:20px 0;
+  overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+}
+.marquee-track{display:flex;width:max-content;animation:scroll 34s linear infinite}
+.marquee:hover .marquee-track{animation-play-state:paused}
+.marquee-group{display:flex;align-items:center;gap:44px;padding-right:44px}
+.marquee-group span{
+  display:flex;align-items:center;gap:44px;
+  font-family:var(--font-d);
+  font-size:13px;font-weight:500;
+  letter-spacing:.02em;
+  color:var(--muted);
+  white-space:nowrap;
+}
+.marquee-group span::after{content:"";width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.22)}
+@keyframes scroll{to{transform:translateX(-50%)}}
+
+.section{padding:clamp(72px,9vw,118px) 0}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:32px;margin-bottom:42px}
+.section-head .eyebrow{margin-bottom:16px}
+h2{
+  font-family:var(--font-d);
+  font-size:clamp(1.9rem,3.4vw,2.9rem);
+  line-height:1.08;
+  letter-spacing:-.04em;
+  font-weight:600;
+}
+.section-head p{color:var(--muted);font-size:14.5px;max-width:380px;line-height:1.65}
+
+.featured-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:22px}
+.featured{
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  transition:transform .3s ease,border-color .3s ease,box-shadow .3s ease;
+}
+.featured:hover{transform:translateY(-5px);border-color:rgba(255,255,255,.2);box-shadow:0 26px 60px rgba(0,0,0,.45)}
+.featured:nth-child(1){grid-column:span 7}
+.featured:nth-child(2){grid-column:span 5}
+.featured:nth-child(3){grid-column:span 4}
+.featured:nth-child(4){grid-column:span 4}
+.featured:nth-child(5){grid-column:span 4}
+.featured-media{
+  position:relative;
+  padding:20px 20px 0;
+  background:
+    radial-gradient(circle at 18% 0%,rgba(139,108,255,.16),transparent 55%),
+    radial-gradient(circle at 88% 18%,rgba(62,230,196,.1),transparent 55%);
+  overflow:hidden;
+}
+.featured-media .browser{transform:translateY(0);transition:transform .45s ease}
+.featured:hover .browser{transform:translateY(-4px)}
+.featured-info{padding:22px 24px 24px;display:flex;flex-direction:column;gap:12px;flex:1}
+.featured-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.badge{
+  font-size:9.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
+  color:#06070b;
+  background:linear-gradient(100deg,var(--mint),#b6fff0);
+  border-radius:999px;
+  padding:4px 9px;
+}
+.featured-year{font-size:11px;color:var(--muted-2);letter-spacing:.1em}
+.featured h3{font-family:var(--font-d);font-size:20px;font-weight:600;letter-spacing:-.025em;line-height:1.25}
+.featured p{font-size:13.5px;color:var(--muted);line-height:1.65}
+.featured .tags{margin-top:auto}
+.featured .work-links{margin-top:2px}
+
+.browser{
+  border:1px solid rgba(255,255,255,.14);
+  border-bottom:0;
+  border-radius:12px 12px 0 0;
+  background:linear-gradient(165deg,var(--m1),var(--m2));
+  box-shadow:0 -1px 0 rgba(255,255,255,.06),0 24px 50px rgba(0,0,0,.5);
+  overflow:hidden;
+  height:100%;
+}
+.b-top{display:flex;align-items:center;gap:9px;padding:9px 11px;background:rgba(0,0,0,.28);border-bottom:1px solid rgba(255,255,255,.08)}
+.b-url{
+  font-size:8.5px;color:rgba(255,255,255,.5);
+  background:rgba(255,255,255,.07);
+  border-radius:5px;
+  padding:2px 8px;
+  letter-spacing:.02em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.b-body{padding:14px;display:flex;flex-direction:column;gap:12px}
+.b-nav{display:flex;align-items:center;gap:9px}
+.b-logo{width:16px;height:16px;border-radius:5px;background:var(--acc);flex:none}
+.b-line{height:4px;border-radius:3px;background:rgba(255,255,255,.22)}
+.w20{width:20%}.w14{width:14%}
+.b-btn{margin-left:auto;width:38px;height:11px;border-radius:999px;background:var(--acc);opacity:.9;flex:none}
+.b-split{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;align-items:center;padding:8px 0 4px}
+.b-copy{display:flex;flex-direction:column;gap:7px}
+.b-kicker{width:34%;height:5px;border-radius:3px;background:var(--acc);opacity:.85}
+.b-h{width:92%;height:11px;border-radius:4px;background:rgba(255,255,255,.86)}
+.b-h.short{width:64%}
+.b-p{width:84%;height:4px;border-radius:3px;background:rgba(255,255,255,.2)}
+.b-p.short{width:58%}
+.b-actions{display:flex;gap:6px;margin-top:4px}
+.b-actions i{width:44px;height:13px;border-radius:999px;background:var(--acc)}
+.b-actions i:last-child{background:rgba(255,255,255,.16)}
+.b-art{
+  aspect-ratio:1/.86;
+  border-radius:9px;
+  background:
+    radial-gradient(circle at 62% 34%,color-mix(in srgb,var(--acc) 55%,transparent),transparent 62%),
+    linear-gradient(150deg,rgba(255,255,255,.14),rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.12);
+  display:grid;place-items:center;
+  overflow:hidden;
+}
+.b-orb{width:44%;aspect-ratio:1;border-radius:50%;background:color-mix(in srgb,var(--acc) 72%,#fff 8%);opacity:.6;filter:blur(2px)}
+.b-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.b-cards i{height:34px;border-radius:7px;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.08)}
+.b-cards i:first-child{border-top-color:var(--acc)}
+.b-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 0}
+.b-chips{display:flex;gap:4px}
+.b-chips i{width:26px;height:9px;border-radius:999px;background:rgba(255,255,255,.12)}
+.b-chips i:first-child{background:var(--acc);opacity:.8}
+.b-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.b-tiles i{
+  aspect-ratio:1/.82;
+  border-radius:7px;
+  background:linear-gradient(160deg,rgba(255,255,255,.13),rgba(255,255,255,.04));
+  border:1px solid rgba(255,255,255,.08);
+}
+.b-tiles i:nth-child(2){background:linear-gradient(160deg,color-mix(in srgb,var(--acc) 30%,transparent),rgba(255,255,255,.03))}
+.b-center{display:flex;flex-direction:column;align-items:center;gap:7px;text-align:center;padding:6px 0 2px}
+.b-center .b-h{width:76%}
+.b-center .b-h.short{width:50%}
+.b-center .b-p{width:60%}
+.b-center .b-kicker{width:22%}
+.b-center .b-actions{justify-content:center}
+
+.tags{display:flex;flex-wrap:wrap;gap:5px;list-style:none}
+.tags li{
+  font-size:10.5px;
+  color:#b9bfcd;
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.04);
+  border-radius:6px;
+  padding:3px 7px;
+  letter-spacing:.01em;
+}
+.work-links{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:4px}
+.work-links a{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:12px;font-weight:600;
+  color:var(--text);
+  border-bottom:1px solid rgba(255,255,255,.2);
+  padding-bottom:2px;
+  transition:color .2s ease,border-color .2s ease;
+}
+.work-links a:hover{color:var(--mint);border-color:var(--mint)}
+.work-links a.ghost{color:var(--muted);border-color:transparent;font-weight:500}
+.work-links a.ghost:hover{color:var(--text);border-color:rgba(255,255,255,.25)}
+.work-links .arrow{font-size:11px;line-height:1;transform:translateY(-1px)}
+.soon{font-size:10.5px;color:var(--muted-2);letter-spacing:.02em}
+
+.process-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.step{
+  padding:26px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:linear-gradient(180deg,rgba(255,255,255,.035),transparent);
+  display:flex;flex-direction:column;gap:12px;
+}
+.step-num{
+  font-family:var(--font-d);
+  font-size:12px;font-weight:600;
+  color:var(--mint);
+  letter-spacing:.12em;
+}
+.step h3{font-family:var(--font-d);font-size:17px;font-weight:600;letter-spacing:-.02em}
+.step p{font-size:13.5px;color:var(--muted);line-height:1.65}
+
+.cta-panel{
+  position:relative;
+  border-radius:26px;
+  padding:clamp(34px,6vw,64px);
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.14);
+  background:
+    radial-gradient(circle at 82% 12%,rgba(62,230,196,.22),transparent 46%),
+    radial-gradient(circle at 12% 88%,rgba(139,108,255,.3),transparent 50%),
+    linear-gradient(160deg,rgba(24,26,40,.9),rgba(10,11,18,.96));
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:36px;
+  align-items:center;
+}
+.cta-panel h2{font-size:clamp(1.9rem,3.6vw,3.1rem);max-width:520px;margin-top:16px}
+.cta-panel p{color:var(--muted);font-size:14.5px;max-width:440px;margin-top:14px;line-height:1.7}
+.cta-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.cta-side{display:flex;flex-direction:column;gap:10px;justify-self:end;width:100%;max-width:290px}
+.cta-item{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:13px 15px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+  background:rgba(255,255,255,.04);
+  font-size:12.5px;
+  color:var(--muted);
+  transition:background .2s ease,border-color .2s ease,transform .2s ease;
+}
+.cta-item:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.24);transform:translateX(-3px)}
+.cta-item b{display:block;color:var(--text);font-size:13px;font-weight:600;margin-bottom:1px}
+.cta-item span{color:var(--muted-2);font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+
+.site-footer{border-top:1px solid var(--line);padding:34px 0 40px;margin-top:20px}
+.footer-inner{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.footer-left{display:flex;align-items:center;gap:12px;font-size:12.5px;color:var(--muted-2)}
+.footer-left b{color:var(--text);font-weight:500}
+.footer-links{display:flex;gap:22px;font-size:12.5px;color:var(--muted)}
+.footer-links a:hover{color:var(--text)}
+.footer-note{font-size:11px;color:var(--muted-2)}
+
+[data-reveal]{opacity:0;transform:translateY(20px);transition:opacity .7s cubic-bezier(.2,.7,.3,1),transform .7s cubic-bezier(.2,.7,.3,1)}
+[data-reveal].in{opacity:1;transform:none}
+.featured-grid [data-reveal]:nth-child(2){transition-delay:.06s}
+.featured-grid [data-reveal]:nth-child(3){transition-delay:.09s}
+.featured-grid [data-reveal]:nth-child(4){transition-delay:.12s}
+.featured-grid [data-reveal]:nth-child(5){transition-delay:.15s}
+
+@media (max-width:1020px){
+  .hero-grid{grid-template-columns:1fr;gap:48px}
+  .hero{padding-top:132px}
+  .hero-lead{max-width:600px}
+  .hero-visual{max-width:620px;width:100%;margin:0 auto}
+  .float-card--live{left:6px}
+  .float-card--stack{right:6px}
+  .featured:nth-child(n){grid-column:span 6}
+  .featured:nth-child(1){grid-column:span 12}
+  .featured:nth-child(5){grid-column:span 12}
+  .process-grid{grid-template-columns:1fr}
+  .cta-panel{grid-template-columns:1fr}
+  .cta-side{justify-self:start;max-width:100%}
+}
+@media (max-width:760px){
+  .nav{display:none}
+  .header-inner{height:68px}
+  .hero{padding-top:116px}
+  .hero-meta{gap:22px}
+  .hero-meta div{min-width:78px}
+  .section-head{flex-direction:column;align-items:flex-start;gap:16px}
+  .featured:nth-child(n){grid-column:span 12}
+  .featured-media{padding:14px 14px 0}
+  .hw{transform:none}
+  .float-card--stack{top:14px;right:-4px}
+  .float-card--live{bottom:14px;left:-4px}
+}
+@media (max-width:480px){
+  .wrap{padding:0 18px}
+  .brand small{display:none}
+  .header-cta{display:none}
+  .hero-meta{gap:16px}
+  .hero-meta b{font-size:20px}
+  .float-card{padding:9px 11px}
+  .float-card--stack{display:none}
+  .b-split{grid-template-columns:1fr}
+  .b-art{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  [data-reveal]{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<div class="orb orb-a" aria-hidden="true"></div>
+<div class="orb orb-b" aria-hidden="true"></div>
+<div class="orb orb-c" aria-hidden="true"></div>
+
+<header class="site-header" id="top">
+  <div class="wrap header-inner">
+    <a class="brand" href="#top" aria-label="Stiven, inicio">
+      <span class="brand-mark">S</span>
+      <span><strong>Stiven</strong><small>Portafolio 2026</small></span>
+    </a>
+    <nav class="nav" aria-label="Navegación principal">
+      <a href="#proyectos">Proyectos</a>
+      <a href="#proceso">Proceso</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <a class="btn btn-ghost btn-sm header-cta" href="https://github.com/Stiven211" target="_blank" rel="noopener">GitHub
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+    </a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="dot"></span>Disponible para nuevos proyectos</span>
+        <h1>Diseño y construyo productos digitales que la gente <span class="grad">usa de verdad</span>.</h1>
+        <p class="hero-lead">Sitios institucionales, portales educativos y landings de negocio. Next.js, TypeScript y Supabase desplegados en producción y cuidados hasta el último detalle.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#proyectos">Ver proyectos
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 3v10M4 9l4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/Stiven211" target="_blank" rel="noopener">Explorar GitHub</a>
+        </div>
+        <div class="hero-meta">
+          <div><b data-count="5">5</b><span>Proyectos</span></div>
+          <div><b data-count="4">4</b><span>Demos en vivo</span></div>
+          <div><b data-count="9">9</b><span>Tecnologías</span></div>
+          <div><b>100%</b><span>Responsive</span></div>
+        </div>
+      </div>
+
+      <div class="hero-visual" data-reveal>
+        <div class="glow" aria-hidden="true"></div>
+        <div class="hw" aria-hidden="true">
+          <div class="hw-bar">
+            <span class="dots"><i></i><i></i><i></i></span>
+            <span class="hw-url">stiven211.github.io/portafolio</span>
+          </div>
+          <div class="hw-body">
+            <aside class="hw-side">
+              <span class="hw-logo"></span>
+              <span class="hw-nav active"></span>
+              <span class="hw-nav"></span>
+              <span class="hw-nav"></span>
+              <span class="hw-nav"></span>
+              <span class="hw-nav mt"></span>
+            </aside>
+            <div class="hw-main">
+              <div class="hw-head">
+                <div><span class="hw-kicker"></span><span class="hw-title"></span></div>
+                <span class="hw-avatar"></span>
+              </div>
+              <div class="hw-stats">
+                <div><b>5</b><span>Proyectos</span></div>
+                <div><b>4</b><span>Demos</span></div>
+                <div><b>9</b><span>Stack</span></div>
+              </div>
+              <div class="hw-chart">
+                <span style="--h:38%"></span><span style="--h:56%"></span><span style="--h:44%"></span>
+                <span style="--h:72%"></span><span style="--h:52%"></span><span style="--h:84%"></span>
+                <span style="--h:64%"></span><span style="--h:92%"></span><span style="--h:70%"></span>
+                <span style="--h:58%"></span><span style="--h:78%"></span><span style="--h:66%"></span>
+                <span style="--h:88%"></span><span style="--h:74%"></span>
+              </div>
+              <div class="hw-rows"><span></span><span></span><span></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="float-card float-card--live">
+          <span class="pulse"></span>
+          <div><b>4 demos</b><small>en producción</small></div>
+        </div>
+        <div class="float-card float-card--stack">
+          <span class="fc-icon">TS</span>
+          <div><b>Next.js + Supabase</b><small>stack principal</small></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="marquee" aria-label="Tecnologías">
+    <div class="marquee-track">
+      <div class="marquee-group">
+        <span>React</span><span>Next.js</span><span>TypeScript</span><span>JavaScript</span><span>Tailwind CSS</span><span>Supabase</span><span>PostgreSQL</span><span>HTML</span><span>CSS</span><span>Framer Motion</span><span>Vercel</span><span>EmailJS</span>
+      </div>
+      <div class="marquee-group" aria-hidden="true">
+        <span>React</span><span>Next.js</span><span>TypeScript</span><span>JavaScript</span><span>Tailwind CSS</span><span>Supabase</span><span>PostgreSQL</span><span>HTML</span><span>CSS</span><span>Framer Motion</span><span>Vercel</span><span>EmailJS</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="section" id="proyectos">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow"><span class="dot"></span>Selección</span>
+          <h2>Proyectos destacados</h2>
+        </div>
+        <p>Cinco builds que representan lo que hago: producto institucional, portales educativos con panel y landings que convierten.</p>
+      </div>
+
+      <div class="featured-grid">
+        <article class="featured" data-reveal>
+          <div class="featured-media">
+            <div class="browser" style="--m1:#0a3a2b;--m2:#061713;--acc:#63f2a7" aria-hidden="true">
+              <div class="b-top"><span class="dots"><i></i><i></i><i></i></span><span class="b-url">colegio-jcm-mutis.vercel.app</span></div>
+              <div class="b-body">
+                <div class="b-nav"><i class="b-logo"></i><span class="b-line w20"></span><span class="b-line w14"></span><span class="b-line w14"></span><i class="b-btn"></i></div>
+                <div class="b-split">
+                  <div class="b-copy"><span class="b-kicker"></span><span class="b-h"></span><span class="b-h short"></span><span class="b-p"></span><span class="b-p short"></span><div class="b-actions"><i></i><i></i></div></div>
+                  <div class="b-art"><span class="b-orb"></span></div>
+                </div>
+                <div class="b-cards"><i></i><i></i><i></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="featured-info">
+            <div class="featured-top"><span class="badge">Insignia</span><span class="featured-year">2026</span></div>
+            <h3>IEJCM · Colegio José Celestino Mutis</h3>
+            <p>Sitio institucional y panel administrativo en una sola app: avisos, eventos, galería y documentos. Todo el contenido se gestiona desde el panel y vive en Supabase.</p>
+            <ul class="tags"><li>Next.js</li><li>TypeScript</li><li>Supabase</li><li>Tailwind</li></ul>
+            <div class="work-links">
+              <a href="https://colegio-jcm-mutis.vercel.app" target="_blank" rel="noopener">Ver demo <span class="arrow">↗</span></a>
+              <a class="ghost" href="https://github.com/Stiven211/IEJCM" target="_blank" rel="noopener">Código</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="featured" data-reveal>
+          <div class="featured-media">
+            <div class="browser" style="--m1:#082a3a;--m2:#05141c;--acc:#4dd8ff" aria-hidden="true">
+              <div class="b-top"><span class="dots"><i></i><i></i><i></i></span><span class="b-url">ciencias-tecnologia-institucional-i.vercel.app</span></div>
+              <div class="b-body">
+                <div class="b-nav"><i class="b-logo"></i><span class="b-line w20"></span><span class="b-line w14"></span><i class="b-btn"></i></div>
+                <div class="b-head"><span class="b-h" style="width:52%"></span><div class="b-chips"><i></i><i></i><i></i></div></div>
+                <div class="b-tiles"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="featured-info">
+            <div class="featured-top"><span class="badge">Institucional</span><span class="featured-year">2026</span></div>
+            <h3>Ciencias y Tecnología</h3>
+            <p>Portal académico con catálogo de proyectos, publicaciones y panel de gestión por roles para docentes de Biología, Química, Física e Informática.</p>
+            <ul class="tags"><li>Next.js</li><li>TypeScript</li><li>Supabase</li></ul>
+            <div class="work-links">
+              <a href="https://ciencias-tecnologia-institucional-i.vercel.app" target="_blank" rel="noopener">Ver demo <span class="arrow">↗</span></a>
+              <a class="ghost" href="https://github.com/Stiven211/Ciencias-tecnologia-institucional-informativa" target="_blank" rel="noopener">Código</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="featured" data-reveal>
+          <div class="featured-media">
+            <div class="browser" style="--m1:#123a1c;--m2:#08150c;--acc:#8fe05a" aria-hidden="true">
+              <div class="b-top"><span class="dots"><i></i><i></i><i></i></span><span class="b-url">eco-programadores.vercel.app</span></div>
+              <div class="b-body">
+                <div class="b-nav"><i class="b-logo"></i><span class="b-line w20"></span><span class="b-line w14"></span><span class="b-line w14"></span><i class="b-btn"></i></div>
+                <div class="b-split">
+                  <div class="b-copy"><span class="b-kicker"></span><span class="b-h"></span><span class="b-h short"></span><span class="b-p"></span><span class="b-p short"></span><div class="b-actions"><i></i><i></i></div></div>
+                  <div class="b-art"><span class="b-orb"></span></div>
+                </div>
+                <div class="b-cards"><i></i><i></i><i></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="featured-info">
+            <div class="featured-top"><span class="badge">Educación</span><span class="featured-year">2026</span></div>
+            <h3>EcoProgramadores STEAM</h3>
+            <p>Sitio del grupo STEAM del Colegio Celestino Mutis: proyectos de ecología, programación, arte y matemáticas para un futuro sostenible.</p>
+            <ul class="tags"><li>HTML</li><li>CSS</li><li>JavaScript</li><li>EmailJS</li></ul>
+            <div class="work-links">
+              <a href="https://eco-programadores.vercel.app" target="_blank" rel="noopener">Ver demo <span class="arrow">↗</span></a>
+              <a class="ghost" href="https://github.com/Stiven211/EcoProgramadores" target="_blank" rel="noopener">Código</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="featured" data-reveal>
+          <div class="featured-media">
+            <div class="browser" style="--m1:#203d32;--m2:#0d1713;--acc:#e4c77b" aria-hidden="true">
+              <div class="b-top"><span class="dots"><i></i><i></i><i></i></span><span class="b-url">expoguaviare · sena</span></div>
+              <div class="b-body">
+                <div class="b-nav"><i class="b-logo"></i><span class="b-line w20"></span><span class="b-line w14"></span><span class="b-line w14"></span><i class="b-btn"></i></div>
+                <div class="b-split">
+                  <div class="b-copy"><span class="b-kicker"></span><span class="b-h"></span><span class="b-h short"></span><span class="b-p"></span><span class="b-p short"></span><div class="b-actions"><i></i><i></i></div></div>
+                  <div class="b-art"><span class="b-orb"></span></div>
+                </div>
+                <div class="b-cards"><i></i><i></i><i></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="featured-info">
+            <div class="featured-top"><span class="badge">SENA</span><span class="featured-year">2025</span></div>
+            <h3>Expoguaviare · SENA</h3>
+            <p>Sitio de servicios de desarrollo web para negocios del Guaviare, con registro de interesados en PostgreSQL. JavaScript puro, sin build y sin dependencias del frontend.</p>
+            <ul class="tags"><li>JavaScript</li><li>Supabase</li><li>PostgreSQL</li><li>Vercel</li></ul>
+            <div class="work-links">
+              <a class="ghost" href="https://github.com/Stiven211/expoguaviare" target="_blank" rel="noopener">Código</a>
+              <span class="soon">Demo en preparación</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="featured" data-reveal>
+          <div class="featured-media">
+            <div class="browser" style="--m1:#3a2408;--m2:#150d04;--acc:#ffb84d" aria-hidden="true">
+              <div class="b-top"><span class="dots"><i></i><i></i><i></i></span><span class="b-url">landing-page-taxi-vip.vercel.app</span></div>
+              <div class="b-body">
+                <div class="b-nav"><i class="b-logo"></i><span class="b-line w20"></span><span class="b-line w14"></span><span class="b-line w14"></span><i class="b-btn"></i></div>
+                <div class="b-center"><span class="b-kicker"></span><span class="b-h"></span><span class="b-h short"></span><span class="b-p"></span><div class="b-actions"><i></i><i></i></div></div>
+                <div class="b-cards"><i></i><i></i><i></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="featured-info">
+            <div class="featured-top"><span class="badge">Landing</span><span class="featured-year">2026</span></div>
+            <h3>Taxi VIP · San José del Guaviare</h3>
+            <p>Landing mobile-first para servicio de taxi ejecutivo: tarifas, reseñas, ubicación y llamada a la acción directa. Pensada para convertir visitas en carreras.</p>
+            <ul class="tags"><li>React 19</li><li>TypeScript</li><li>Tailwind</li><li>Framer Motion</li></ul>
+            <div class="work-links">
+              <a href="https://landing-page-taxi-vip.vercel.app" target="_blank" rel="noopener">Ver demo <span class="arrow">↗</span></a>
+              <a class="ghost" href="https://github.com/Stiven211/Landing-page-taxi-vip" target="_blank" rel="noopener">Código</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="proceso" style="padding-top:0">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow"><span class="dot"></span>Cómo trabajo</span>
+          <h2>De la idea al deploy</h2>
+        </div>
+        <p>Un proceso corto y transparente. Sin sorpresas, sin entregas a medias y sin código que nadie pueda mantener.</p>
+      </div>
+      <div class="process-grid">
+        <article class="step" data-reveal>
+          <span class="step-num">01 / Diagnóstico</span>
+          <h3>Entender antes de construir</h3>
+          <p>Definimos objetivo, audiencia y alcance real. Elijo el stack mínimo que resuelve el problema, no el que está de moda.</p>
+        </article>
+        <article class="step" data-reveal>
+          <span class="step-num">02 / Diseño y build</span>
+          <h3>Interfaz y código a la par</h3>
+          <p>Diseño responsive, accesible y con identidad. Construyo con React, Next.js y Supabase, validando en cada avance.</p>
+        </article>
+        <article class="step" data-reveal>
+          <span class="step-num">03 / Deploy y traspaso</span>
+          <h3>En producción, no en un cajón</h3>
+          <p>Despliegue en Vercel, configuración del panel, dominio y documentación para que el proyecto siga vivo sin mí.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="contacto" style="padding-top:0">
+    <div class="wrap">
+      <div class="cta-panel" data-reveal>
+        <div>
+          <span class="eyebrow"><span class="dot"></span>Hablemos</span>
+          <h2>¿Tienes un proyecto en mente?</h2>
+          <p>Estoy abierto a sitios institucionales, portales educativos y landings de negocio. Cuéntame qué necesitas y te digo cómo lo abordaría.</p>
+          <div class="cta-actions">
+            <a class="btn btn-primary" href="https://github.com/Stiven211" target="_blank" rel="noopener">Escribirme en GitHub
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a class="btn btn-ghost" href="#proyectos">Ver proyectos</a>
+          </div>
+        </div>
+        <div class="cta-side">
+          <a class="cta-item" href="https://github.com/Stiven211" target="_blank" rel="noopener"><div><b>github.com/Stiven211</b><span>Repositorios</span></div><span>↗</span></a>
+          <div class="cta-item"><div><b>San José del Guaviare</b><span>Colombia</span></div><span>GMT-5</span></div>
+          <div class="cta-item"><div><b>Disponibilidad abierta</b><span>Freelance / colaboración</span></div><span class="pulse"></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-left">
+      <span class="brand-mark" style="width:30px;height:30px;font-size:15px;border-radius:9px">S</span>
+      <span><b>Stiven</b> · Producto y desarrollo web</span>
+    </div>
+    <nav class="footer-links" aria-label="Enlaces del pie">
+      <a href="#proyectos">Proyectos</a>
+      <a href="#proceso">Proceso</a>
+      <a href="https://github.com/Stiven211" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <span class="footer-note">© <span id="year">2026</span> · HTML, CSS y JavaScript sin dependencias</span>
+  </div>
+</footer>
+
+<script>
+const header = document.querySelector('.site-header');
+const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 12);
+onScroll();
+window.addEventListener('scroll', onScroll, { passive: true });
+
+const revealEls = document.querySelectorAll('[data-reveal]');
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (reduce || !('IntersectionObserver' in window)) {
+  revealEls.forEach(el => el.classList.add('in'));
+} else {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+  revealEls.forEach(el => io.observe(el));
+}
+
+const counters = document.querySelectorAll('[data-count]');
+if (counters.length && !reduce) {
+  const countIo = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      const target = Number(el.dataset.count);
+      const start = performance.now();
+      const duration = 1100;
+      const tick = (now) => {
+        const p = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(target * eased);
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+      countIo.unobserve(el);
+    });
+  }, { threshold: 0.6 });
+  counters.forEach(el => countIo.observe(el));
+}
+
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

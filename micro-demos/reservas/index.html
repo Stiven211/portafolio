@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<title>RutaVerde · Reservas · Micro demo</title>
+<meta name="description" content="Micro demo de reservas de ecoturismo: planes, fecha, personas, cotización y confirmación.">
+<link rel="stylesheet" href="../demo.css?v=1">
+</head>
+<body>
+<header class="demo-top">
+  <div class="demo-top-in">
+    <a class="demo-brand" href="../">
+      <span class="brand-mark">S</span>
+      <span><strong>Stiven</strong><small>Micro demos</small></span>
+    </a>
+    <div class="actions">
+      <a class="btn btn-sm btn-ghost hide-sm" href="../">Todos los demos</a>
+      <a class="btn btn-sm btn-ghost" href="../../index.html#demos">Portafolio</a>
+    </div>
+  </div>
+</header>
+
+<main class="demo-wrap">
+  <div class="demo-head">
+    <div>
+      <span class="pill"><span class="dot"></span>Micro demo · Turismo</span>
+      <h1>RutaVerde</h1>
+      <p>Cotizador de planes de ecoturismo en el Guaviare. Elige el plan, la fecha y el número de personas; confirma y recibe el código de reserva.</p>
+    </div>
+    <span class="badge">Datos simulados</span>
+  </div>
+
+  <div class="app">
+    <div class="stack">
+      <section class="panel">
+        <div class="panel-head"><h2>Planes disponibles</h2><small>3 experiencias</small></div>
+        <div class="plan-grid" id="plans"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><h2>Reservas recientes</h2><small id="recent-count">1</small></div>
+        <div class="list" id="recent"></div>
+      </section>
+    </div>
+
+    <aside class="panel">
+      <div class="panel-head"><h2>Cotiza tu plan</h2><small>Precio por persona</small></div>
+      <form id="form" class="stack" autocomplete="off">
+        <div class="field">
+          <label for="name">Nombre del titular</label>
+          <input id="name" type="text" placeholder="Nombre completo" required>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="date">Fecha de salida</label>
+            <input id="date" type="date" required>
+          </div>
+          <div class="field">
+            <label for="people">Personas</label>
+            <input id="people" type="number" min="1" max="10" value="2" required>
+          </div>
+        </div>
+        <div class="total" style="margin-top:2px">
+          <span>Total</span>
+          <b id="total">$0</b>
+        </div>
+        <p class="micro-note" id="deposit">Abono del 20%: $0</p>
+        <button class="btn btn-primary btn-block" type="submit">Confirmar reserva</button>
+      </form>
+
+      <div class="summary-box" id="summary" style="margin-top:14px" role="status" aria-live="polite">
+        <h3>Reserva confirmada</h3>
+        <p id="summary-text"></p>
+        <div class="summary-code" id="summary-code"></div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const plans = [
+  { id: 'cano', name: 'Caño Cristales · 3 días', desc: 'Río de los cinco colores, guía y transporte', price: 850000, mark: 'CC', a: '#3a1424', b: '#7a2a4a' },
+  { id: 'raudal', name: 'Raudal del Guaviare · 2 días', desc: 'Navegación, miradores y campamento', price: 620000, mark: 'RG', a: '#122f3e', b: '#225a70' },
+  { id: 'sendero', name: 'Sendero Cerro Azul · 1 día', desc: 'Caminata guiada y avistamiento de aves', price: 180000, mark: 'CA', a: '#15351f', b: '#2b6b3a' }
+];
+
+const $ = id => document.getElementById(id);
+const money = n => '$' + n.toLocaleString('es-CO');
+let selected = 'cano';
+let recent = [
+  { code: 'RV-4821', name: 'Laura Gómez', plan: 'cano', people: 2, total: 1700000 }
+];
+
+$('date').min = new Date().toISOString().slice(0, 10);
+
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function planById(id) {
+  return plans.find(p => p.id === id);
+}
+
+function updateTotal() {
+  const plan = planById(selected);
+  const people = Math.min(10, Math.max(1, Number($('people').value) || 1));
+  const total = plan.price * people;
+  $('total').textContent = money(total);
+  $('deposit').textContent = 'Abono del 20%: ' + money(Math.round(total * 0.2));
+}
+
+function renderPlans() {
+  $('plans').innerHTML = plans.map(p => `
+    <button type="button" class="plan ${selected === p.id ? 'is-active' : ''}" data-plan="${p.id}">
+      <span class="item-mark" style="--a:${p.a};--b:${p.b}">${p.mark}</span>
+      <span class="plan-main"><b>${p.name}</b><small>${p.desc}</small></span>
+      <span class="price">${money(p.price)}</span>
+    </button>
+  `).join('');
+}
+
+function renderRecent() {
+  $('recent-count').textContent = recent.length + (recent.length === 1 ? ' reserva' : ' reservas');
+  if (!recent.length) {
+    $('recent').innerHTML = '<div class="empty">Todavía no hay reservas.</div>';
+    return;
+  }
+  $('recent').innerHTML = recent.map(r => `
+    <div class="item">
+      <span class="item-mark" style="--a:#123028;--b:#1d5c4b">${r.people}</span>
+      <span class="item-main"><b>${r.name}</b><small>${planById(r.plan).name.split(' · ')[0]} · ${r.people} ${r.people === 1 ? 'persona' : 'personas'}</small></span>
+      <span class="price">${money(r.total)}</span>
+      <span class="badge is-ok">${r.code}</span>
+    </div>
+  `).join('');
+}
+
+document.addEventListener('click', e => {
+  const btn = e.target.closest('[data-plan]');
+  if (!btn) return;
+  selected = btn.dataset.plan;
+  renderPlans();
+  updateTotal();
+  $('summary').classList.remove('is-visible');
+});
+
+$('people').addEventListener('input', updateTotal);
+
+$('form').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = $('name').value.trim();
+  const date = $('date').value;
+  const people = Math.min(10, Math.max(1, Number($('people').value) || 1));
+
+  if (!name) return toast('Escribe el nombre del titular.');
+  if (!date) return toast('Selecciona la fecha de salida.');
+
+  const plan = planById(selected);
+  const total = plan.price * people;
+  const code = 'RV-' + String(Math.floor(1000 + Math.random() * 9000));
+  const [y, m, d] = date.split('-');
+  const niceDate = `${d}/${m}/${y}`;
+
+  recent.unshift({ code, name, plan: selected, people, total });
+  $('summary-text').textContent = `${name} · ${plan.name.split(' · ')[0]} · ${niceDate} · ${people} ${people === 1 ? 'persona' : 'personas'}.`;
+  $('summary-code').textContent = `${code} · ${money(total)}`;
+  $('summary').classList.add('is-visible');
+
+  $('name').value = '';
+  $('people').value = '2';
+  updateTotal();
+  renderRecent();
+  toast(`Reserva ${code} confirmada para ${name}.`);
+});
+
+renderPlans();
+updateTotal();
+renderRecent();
+</script>
+</body>
+</html>

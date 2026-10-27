@@ -287,6 +287,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 @keyframes scroll{to{transform:translateX(-50%)}}
 
 .section{padding:clamp(72px,9vw,118px) 0}
+section[id]{scroll-margin-top:92px}
 .section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:32px;margin-bottom:42px}
 .section-head .eyebrow{margin-bottom:16px}
 h2{
@@ -432,6 +433,66 @@ h2{
 .work-links .arrow{font-size:11px;line-height:1;transform:translateY(-1px)}
 .soon{font-size:10.5px;color:var(--muted-2);letter-spacing:.02em}
 
+.demo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.demo-card{
+  position:relative;
+  display:flex;flex-direction:column;gap:10px;
+  padding:20px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));
+  overflow:hidden;
+  transition:transform .28s ease,border-color .28s ease,box-shadow .28s ease;
+}
+.demo-card::before{
+  content:"";position:absolute;inset:0 0 auto;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(62,230,196,.6),transparent);
+  opacity:0;transition:opacity .28s ease;
+}
+.demo-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.22);box-shadow:0 20px 44px rgba(0,0,0,.38)}
+.demo-card:hover::before{opacity:1}
+.demo-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.demo-mark{
+  width:38px;height:38px;
+  display:grid;place-items:center;
+  border-radius:10px;
+  font-family:var(--font-d);font-size:12px;font-weight:600;
+  background:linear-gradient(145deg,var(--a,#2a2350),var(--b,#171327));
+  border:1px solid rgba(255,255,255,.12);
+}
+.demo-cat{
+  font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted-2);
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:4px 8px;
+  white-space:nowrap;
+}
+.demo-card h3{font-family:var(--font-d);font-size:16.5px;font-weight:600;letter-spacing:-.02em;margin-top:4px}
+.demo-card h3 span{color:var(--muted);font-weight:500}
+.demo-card p{font-size:12.5px;color:var(--muted);line-height:1.6;flex:1}
+.demo-open{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  border-top:1px solid var(--line);
+  padding-top:11px;margin-top:2px;
+  font-size:11.5px;font-weight:600;
+  color:var(--muted);
+  transition:color .2s ease;
+}
+.demo-open span{color:var(--mint);font-size:12px}
+.demo-card:hover .demo-open{color:var(--text)}
+.demo-all{display:flex;justify-content:center;margin-top:24px}
+.demo-all a{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12.5px;font-weight:600;
+  color:var(--text);
+  border-bottom:1px solid rgba(255,255,255,.22);
+  padding-bottom:2px;
+  transition:color .2s ease,border-color .2s ease;
+}
+.demo-all a:hover{color:var(--mint);border-color:var(--mint)}
+.demo-all .arrow{font-size:11px;transform:translateY(-1px)}
+
 .process-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .step{
   padding:26px;
@@ -482,6 +543,54 @@ h2{
 .cta-item b{display:block;color:var(--text);font-size:13px;font-weight:600;margin-bottom:1px}
 .cta-item span{color:var(--muted-2);font-size:10px;letter-spacing:.1em;text-transform:uppercase}
 
+.contact-points{display:flex;flex-direction:column;gap:8px;margin-top:26px;font-size:12.5px;color:var(--muted)}
+.contact-points span{display:flex;align-items:center;gap:9px}
+.contact-points i{width:5px;height:5px;border-radius:50%;background:var(--mint);flex:none}
+.contact-mail{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:20px;
+  font-size:13px;font-weight:600;color:var(--text);
+  border-bottom:1px solid rgba(255,255,255,.22);
+  padding-bottom:2px;
+  transition:color .2s ease,border-color .2s ease;
+}
+.contact-mail:hover{color:var(--mint);border-color:var(--mint)}
+.contact-form{
+  width:100%;max-width:440px;justify-self:end;
+  display:flex;flex-direction:column;gap:12px;
+  padding:20px;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:18px;
+  background:rgba(6,7,12,.58);
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
+}
+.contact-form .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.contact-form .field label{color:#9aa1b2}
+.contact-form input,.contact-form select,.contact-form textarea{
+  width:100%;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;
+  background:rgba(0,0,0,.28);
+  color:var(--text);
+  font:inherit;
+  font-size:13px;
+  outline:none;
+  transition:border-color .18s ease,background .18s ease;
+}
+.contact-form input,.contact-form select{height:40px;padding:0 11px}
+.contact-form textarea{min-height:104px;padding:10px 11px;line-height:1.5;resize:vertical}
+.contact-form input:focus,.contact-form select:focus,.contact-form textarea:focus{border-color:rgba(62,230,196,.55);background:rgba(0,0,0,.38)}
+.contact-form input::placeholder,.contact-form textarea::placeholder{color:#5f6678}
+.contact-form select option{background:#10131d;color:var(--text)}
+.contact-form .btn{margin-top:2px}
+.cta-panel .contact-form p{margin:0;max-width:none}
+.form-note{font-size:10.5px;color:var(--muted-2);line-height:1.5}
+.form-status{display:none;border-radius:10px;padding:9px 11px;font-size:11.5px;line-height:1.5;border:1px solid transparent}
+.form-status.is-ok{display:block;color:#9ffbe4;background:rgba(62,230,196,.1);border-color:rgba(62,230,196,.3)}
+.form-status.is-error{display:block;color:#ffb3bc;background:rgba(255,107,122,.1);border-color:rgba(255,107,122,.3)}
+.hp{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
+
 .site-footer{border-top:1px solid var(--line);padding:34px 0 40px;margin-top:20px}
 .footer-inner{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
 .footer-left{display:flex;align-items:center;gap:12px;font-size:12.5px;color:var(--muted-2)}
@@ -506,8 +615,9 @@ html.js [data-reveal].in{opacity:1;transform:none}
   .float-card--stack{right:6px}
   .featured:nth-child(n){grid-column:span 6}
   .featured:nth-child(1){grid-column:span 12}
-  .featured:nth-child(5){grid-column:span 12}
-  .process-grid{grid-template-columns:1fr}
+      .featured:nth-child(5){grid-column:span 12}
+      .demo-grid{grid-template-columns:1fr 1fr}
+      .process-grid{grid-template-columns:1fr}
   .cta-panel{grid-template-columns:1fr}
   .cta-side{justify-self:start;max-width:100%}
 }
@@ -530,6 +640,9 @@ html.js [data-reveal].in{opacity:1;transform:none}
   .header-cta{display:none}
   .hero-meta{display:grid;grid-template-columns:1fr 1fr;gap:18px 20px}
   .hero-meta b{font-size:20px}
+  .demo-grid{grid-template-columns:1fr}
+  .contact-form .form-row{grid-template-columns:1fr}
+  .contact-form{max-width:none}
   .float-card{padding:9px 11px}
   .float-card--stack{display:none}
   .b-split{grid-template-columns:1fr}
@@ -555,6 +668,7 @@ html.js [data-reveal].in{opacity:1;transform:none}
     </a>
     <nav class="nav" aria-label="Navegación principal">
       <a href="#proyectos">Proyectos</a>
+      <a href="#demos">Demos</a>
       <a href="#proceso">Proceso</a>
       <a href="#contacto">Contacto</a>
     </nav>
@@ -579,7 +693,7 @@ html.js [data-reveal].in{opacity:1;transform:none}
         </div>
         <div class="hero-meta">
           <div><b data-count="5">5</b><span>Proyectos</span></div>
-          <div><b data-count="5">5</b><span>Demos en vivo</span></div>
+          <div><b data-count="6">6</b><span>Micro demos</span></div>
           <div><b data-count="9">9</b><span>Tecnologías</span></div>
           <div><b>100%</b><span>Responsive</span></div>
         </div>
@@ -608,7 +722,7 @@ html.js [data-reveal].in{opacity:1;transform:none}
               </div>
               <div class="hw-stats">
                 <div><b>5</b><span>Proyectos</span></div>
-                <div><b>5</b><span>Demos</span></div>
+                <div><b>6</b><span>Demos</span></div>
                 <div><b>9</b><span>Stack</span></div>
               </div>
               <div class="hw-chart">
@@ -624,7 +738,7 @@ html.js [data-reveal].in{opacity:1;transform:none}
         </div>
         <div class="float-card float-card--live">
           <span class="pulse"></span>
-          <div><b>5 demos</b><small>en producción</small></div>
+          <div><b>11 builds</b><small>5 proyectos · 6 demos</small></div>
         </div>
         <div class="float-card float-card--stack">
           <span class="fc-icon">TS</span>
@@ -652,7 +766,7 @@ html.js [data-reveal].in{opacity:1;transform:none}
           <span class="eyebrow"><span class="dot"></span>Selección</span>
           <h2>Proyectos destacados</h2>
         </div>
-        <p>Cinco builds que representan lo que hago: producto institucional, portales educativos con panel y landings que convierten.</p>
+        <p>Cinco proyectos que representan lo que hago: producto institucional, portales educativos con panel y landings que convierten.</p>
       </div>
 
       <div class="featured-grid">
@@ -676,8 +790,7 @@ html.js [data-reveal].in{opacity:1;transform:none}
             <p>Sitio institucional y panel administrativo en una sola app: avisos, eventos, galería y documentos. Todo el contenido se gestiona desde el panel y vive en Supabase.</p>
             <ul class="tags"><li>Next.js</li><li>TypeScript</li><li>Supabase</li><li>Tailwind</li></ul>
             <div class="work-links">
-              <a href="https://colegio-jcm-mutis.vercel.app" target="_blank" rel="noopener">Ver demo <span class="arrow">↗</span></a>
-              <a class="ghost" href="https://github.com/Stiven211/IEJCM" target="_blank" rel="noopener">Código</a>
+              <a href="https://colegio-jcm-mutis.vercel.app" target="_blank" rel="noopener">Ver proyecto <span class="arrow">↗</span></a>
             </div>
           </div>
         </article>
@@ -699,8 +812,7 @@ html.js [data-reveal].in{opacity:1;transform:none}
             <p>Portal académico con catálogo de proyectos, publicaciones y panel de gestión por roles para docentes de Biología, Química, Física e Informática.</p>
             <ul class="tags"><li>Next.js</li><li>TypeScript</li><li>Supabase</li></ul>
             <div class="work-links">
-              <a href="https://ciencias-tecnologia-institucional-i.vercel.app" target="_blank" rel="noopener">Ver demo <span class="arrow">↗</span></a>
-              <a class="ghost" href="https://github.com/Stiven211/Ciencias-tecnologia-institucional-informativa" target="_blank" rel="noopener">Código</a>
+              <a href="https://ciencias-tecnologia-institucional-i.vercel.app" target="_blank" rel="noopener">Ver proyecto <span class="arrow">↗</span></a>
             </div>
           </div>
         </article>
@@ -725,8 +837,7 @@ html.js [data-reveal].in{opacity:1;transform:none}
             <p>Sitio del grupo STEAM del Colegio Celestino Mutis: proyectos de ecología, programación, arte y matemáticas para un futuro sostenible.</p>
             <ul class="tags"><li>HTML</li><li>CSS</li><li>JavaScript</li><li>EmailJS</li></ul>
             <div class="work-links">
-              <a href="https://eco-programadores.vercel.app" target="_blank" rel="noopener">Ver demo <span class="arrow">↗</span></a>
-              <a class="ghost" href="https://github.com/Stiven211/EcoProgramadores" target="_blank" rel="noopener">Código</a>
+              <a href="https://eco-programadores.vercel.app" target="_blank" rel="noopener">Ver proyecto <span class="arrow">↗</span></a>
             </div>
           </div>
         </article>
@@ -751,8 +862,7 @@ html.js [data-reveal].in{opacity:1;transform:none}
             <p>Sitio de servicios de desarrollo web para negocios del Guaviare, con registro de interesados en PostgreSQL. JavaScript puro, sin build y sin dependencias del frontend.</p>
             <ul class="tags"><li>JavaScript</li><li>Supabase</li><li>PostgreSQL</li><li>Vercel</li></ul>
             <div class="work-links">
-              <a href="https://stiven211.github.io/expoguaviare/" target="_blank" rel="noopener">Ver demo <span class="arrow">↗</span></a>
-              <a class="ghost" href="https://github.com/Stiven211/expoguaviare" target="_blank" rel="noopener">Código</a>
+              <a href="https://expoguaviare.vercel.app/" target="_blank" rel="noopener">Ver proyecto <span class="arrow">↗</span></a>
             </div>
           </div>
         </article>
@@ -774,11 +884,88 @@ html.js [data-reveal].in{opacity:1;transform:none}
             <p>Landing mobile-first para servicio de taxi ejecutivo: tarifas, reseñas, ubicación y llamada a la acción directa. Pensada para convertir visitas en carreras.</p>
             <ul class="tags"><li>React 19</li><li>TypeScript</li><li>Tailwind</li><li>Framer Motion</li></ul>
             <div class="work-links">
-              <a href="https://landing-page-taxi-vip.vercel.app" target="_blank" rel="noopener">Ver demo <span class="arrow">↗</span></a>
-              <a class="ghost" href="https://github.com/Stiven211/Landing-page-taxi-vip" target="_blank" rel="noopener">Código</a>
+              <a href="https://landing-page-taxi-vip.vercel.app" target="_blank" rel="noopener">Ver proyecto <span class="arrow">↗</span></a>
             </div>
           </div>
         </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="demos" style="padding-top:0">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow"><span class="dot"></span>Laboratorio</span>
+          <h2>Micro demos</h2>
+        </div>
+        <p>Seis sistemas funcionales en versión reducida. Datos simulados, interacción real: ventas, asistencia, citas, inventario, comandas y reservas.</p>
+      </div>
+
+      <div class="demo-grid">
+        <a class="demo-card" href="micro-demos/pos/" data-reveal>
+          <div class="demo-card-top">
+            <span class="demo-mark" style="--a:#3a1f6e;--b:#1a1140">PG</span>
+            <span class="demo-cat">Ventas</span>
+          </div>
+          <h3>PuntoGo <span>· POS</span></h3>
+          <p>Cobra productos, ajusta cantidades, elige el pago y cierra la venta.</p>
+          <span class="demo-open">Abrir demo <span>↗</span></span>
+        </a>
+
+        <a class="demo-card" href="micro-demos/asistencia/" data-reveal>
+          <div class="demo-card-top">
+            <span class="demo-mark" style="--a:#0e3b2c;--b:#14513b">AS</span>
+            <span class="demo-cat">Educación</span>
+          </div>
+          <h3>Asiste <span>· Asistencia</span></h3>
+          <p>Marca presente, ausente o tarde y guarda la jornada del curso.</p>
+          <span class="demo-open">Abrir demo <span>↗</span></span>
+        </a>
+
+        <a class="demo-card" href="micro-demos/agenda/" data-reveal>
+          <div class="demo-card-top">
+            <span class="demo-mark" style="--a:#3a2408;--b:#6b4410">AG</span>
+            <span class="demo-cat">Servicios</span>
+          </div>
+          <h3>Norte <span>· Agenda</span></h3>
+          <p>Agenda citas por servicio, fecha y hora con espacios bloqueados.</p>
+          <span class="demo-open">Abrir demo <span>↗</span></span>
+        </a>
+
+        <a class="demo-card" href="micro-demos/inventario/" data-reveal>
+          <div class="demo-card-top">
+            <span class="demo-mark" style="--a:#0a2f42;--b:#155a7a">ST</span>
+            <span class="demo-cat">Operaciones</span>
+          </div>
+          <h3>Stockly <span>· Inventario</span></h3>
+          <p>Controla entradas, salidas, mínimos y alertas de bajo stock.</p>
+          <span class="demo-open">Abrir demo <span>↗</span></span>
+        </a>
+
+        <a class="demo-card" href="micro-demos/comandas/" data-reveal>
+          <div class="demo-card-top">
+            <span class="demo-mark" style="--a:#3a1010;--b:#7a2020">ML</span>
+            <span class="demo-cat">Restaurantes</span>
+          </div>
+          <h3>MesaLista <span>· Comandas</span></h3>
+          <p>Toma pedidos por mesa y avanza la comanda hasta entregada.</p>
+          <span class="demo-open">Abrir demo <span>↗</span></span>
+        </a>
+
+        <a class="demo-card" href="micro-demos/reservas/" data-reveal>
+          <div class="demo-card-top">
+            <span class="demo-mark" style="--a:#123028;--b:#1d5c4b">RV</span>
+            <span class="demo-cat">Turismo</span>
+          </div>
+          <h3>RutaVerde <span>· Reservas</span></h3>
+          <p>Cotiza planes de ecoturismo y confirma con código de reserva.</p>
+          <span class="demo-open">Abrir demo <span>↗</span></span>
+        </a>
+      </div>
+
+      <div class="demo-all">
+        <a href="micro-demos/">Abrir el laboratorio completo <span class="arrow">↗</span></a>
       </div>
     </div>
   </section>
@@ -815,22 +1002,57 @@ html.js [data-reveal].in{opacity:1;transform:none}
   <section class="section" id="contacto" style="padding-top:0">
     <div class="wrap">
       <div class="cta-panel" data-reveal>
-        <div>
+        <div class="cta-copy">
           <span class="eyebrow"><span class="dot"></span>Hablemos</span>
           <h2>¿Tienes un proyecto en mente?</h2>
           <p>Estoy abierto a sitios institucionales, portales educativos y landings de negocio. Cuéntame qué necesitas y te digo cómo lo abordaría.</p>
-          <div class="cta-actions">
-            <a class="btn btn-primary" href="https://github.com/Stiven211" target="_blank" rel="noopener">Escribirme en GitHub
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </a>
+          <div class="contact-points">
+            <span><i></i>San José del Guaviare · GMT-5</span>
+            <span><i></i>Disponibilidad para freelance y colaboración</span>
+            <span><i></i>Respuesta en 24–48 horas</span>
+          </div>
+          <a class="contact-mail" href="mailto:kurregorojas@gmail.com">kurregorojas@gmail.com</a>
+          <div class="cta-actions" style="margin-top:24px">
+            <a class="btn btn-ghost" href="https://github.com/Stiven211" target="_blank" rel="noopener">Ver GitHub</a>
             <a class="btn btn-ghost" href="#proyectos">Ver proyectos</a>
           </div>
         </div>
-        <div class="cta-side">
-          <a class="cta-item" href="https://github.com/Stiven211" target="_blank" rel="noopener"><div><b>github.com/Stiven211</b><span>Repositorios</span></div><span>↗</span></a>
-          <div class="cta-item"><div><b>San José del Guaviare</b><span>Colombia</span></div><span>GMT-5</span></div>
-          <div class="cta-item"><div><b>Disponibilidad abierta</b><span>Freelance / colaboración</span></div><span class="pulse"></span></div>
-        </div>
+
+        <form class="contact-form" id="contact-form" action="https://formsubmit.co/kurregorojas@gmail.com" method="POST">
+          <div class="form-row">
+            <div class="field">
+              <label for="contact-name">Nombre</label>
+              <input id="contact-name" name="name" type="text" placeholder="Tu nombre" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label for="contact-email">Correo</label>
+              <input id="contact-email" name="email" type="email" placeholder="tu@correo.com" autocomplete="email" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="contact-type">Tipo de proyecto</label>
+            <select id="contact-type" name="tipo">
+              <option>Sitio institucional</option>
+              <option>Portal educativo</option>
+              <option>Landing de negocio</option>
+              <option>Sistema web</option>
+              <option>Otro</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="contact-message">Mensaje</label>
+            <textarea id="contact-message" name="message" rows="4" minlength="20" placeholder="Cuéntame qué necesitas, para cuándo y qué presupuesto tienes..." required></textarea>
+          </div>
+          <input class="hp" type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <input type="hidden" name="_subject" value="Nuevo mensaje desde el portafolio">
+          <input type="hidden" name="_template" value="table">
+          <input type="hidden" name="_captcha" value="true">
+          <input type="hidden" name="_next" value="https://stiven211.github.io/portafolio/?enviado=1#contacto">
+          <input type="hidden" name="origen" value="portafolio">
+          <button class="btn btn-primary btn-block" type="submit" id="contact-submit">Enviar mensaje</button>
+          <p class="form-note">Tus datos solo se usan para responderte. Sin spam.</p>
+          <div class="form-status" id="form-status" role="status" aria-live="polite"></div>
+        </form>
       </div>
     </div>
   </section>
@@ -844,6 +1066,7 @@ html.js [data-reveal].in{opacity:1;transform:none}
     </div>
     <nav class="footer-links" aria-label="Enlaces del pie">
       <a href="#proyectos">Proyectos</a>
+      <a href="#demos">Demos</a>
       <a href="#proceso">Proceso</a>
       <a href="https://github.com/Stiven211" target="_blank" rel="noopener">GitHub</a>
     </nav>
@@ -893,6 +1116,45 @@ if (counters.length && !reduce) {
     });
   }, { threshold: 0.6 });
   counters.forEach(el => countIo.observe(el));
+}
+
+const contactForm = document.getElementById('contact-form');
+if (contactForm) {
+  const startedAt = Date.now();
+  const status = document.getElementById('form-status');
+  const submit = document.getElementById('contact-submit');
+  const params = new URLSearchParams(location.search);
+
+  const showStatus = (message, ok) => {
+    status.textContent = message;
+    status.className = 'form-status ' + (ok ? 'is-ok' : 'is-error');
+  };
+
+  if (params.get('enviado') === '1') {
+    showStatus('Mensaje enviado. Te responderé en 24–48 horas.', true);
+    params.delete('enviado');
+    const query = params.toString();
+    history.replaceState(null, '', location.pathname + (query ? '?' + query : '') + '#contacto');
+  }
+
+  contactForm.addEventListener('submit', (e) => {
+    if (contactForm.querySelector('[name="_honey"]').value) {
+      e.preventDefault();
+      return;
+    }
+    if (Date.now() - startedAt < 3000) {
+      e.preventDefault();
+      showStatus('Espera un momento antes de enviar.', false);
+      return;
+    }
+    if (!contactForm.checkValidity()) {
+      e.preventDefault();
+      contactForm.reportValidity();
+      return;
+    }
+    submit.disabled = true;
+    submit.textContent = 'Enviando...';
+  });
 }
 
 document.getElementById('year').textContent = new Date().getFullYear();

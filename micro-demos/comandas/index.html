@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<title>MesaLista · Comandas · Micro demo</title>
+<meta name="description" content="Micro demo de comandas: pedidos por mesa, envío a cocina y seguimiento de estados.">
+<link rel="stylesheet" href="../demo.css?v=1">
+</head>
+<body>
+<header class="demo-top">
+  <div class="demo-top-in">
+    <a class="demo-brand" href="../">
+      <span class="brand-mark">S</span>
+      <span><strong>Stiven</strong><small>Micro demos</small></span>
+    </a>
+    <div class="actions">
+      <a class="btn btn-sm btn-ghost hide-sm" href="../">Todos los demos</a>
+      <a class="btn btn-sm btn-ghost" href="../../index.html#demos">Portafolio</a>
+    </div>
+  </div>
+</header>
+
+<main class="demo-wrap">
+  <div class="demo-head">
+    <div>
+      <span class="pill"><span class="dot"></span>Micro demo · Restaurantes</span>
+      <h1>MesaLista</h1>
+      <p>Toma el pedido de una mesa, envíalo a cocina y avanza la comanda de “en preparación” a “listo” y “entregado”.</p>
+    </div>
+    <span class="badge">Datos simulados</span>
+  </div>
+
+  <div class="app">
+    <section class="panel">
+      <div class="panel-head"><h2>Menú</h2><small>6 platos</small></div>
+      <div class="product-grid" id="menu"></div>
+    </section>
+
+    <aside class="panel">
+      <div class="panel-head"><h2>Nueva comanda</h2><small id="count">0 ítems</small></div>
+      <div class="field" style="margin-bottom:10px">
+        <label for="table">Mesa</label>
+        <select id="table">
+          <option value="">Selecciona una mesa</option>
+          <option value="1">Mesa 1</option>
+          <option value="2">Mesa 2</option>
+          <option value="3">Mesa 3</option>
+          <option value="4">Mesa 4</option>
+          <option value="5">Mesa 5</option>
+          <option value="6">Mesa 6</option>
+          <option value="7">Mesa 7</option>
+          <option value="8">Mesa 8</option>
+        </select>
+      </div>
+      <div class="list" id="cart"></div>
+      <div class="total">
+        <span>Total</span>
+        <b id="total">$0</b>
+      </div>
+      <div class="stack" style="margin-top:13px">
+        <button class="btn btn-primary btn-block" id="send">Enviar a cocina</button>
+        <button class="btn btn-ghost btn-block" id="clear">Vaciar</button>
+      </div>
+    </aside>
+  </div>
+
+  <section class="panel" style="margin-top:18px">
+    <div class="panel-head">
+      <h2>Comandas</h2>
+      <small id="orders-count">0 activas</small>
+    </div>
+    <div class="order-grid" id="orders"></div>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const menu = [
+  { id: 'burg', name: 'Hamburguesa clásica', desc: 'Carne, queso y papas', price: 18000, mark: 'HB', a: '#3a1c10', b: '#7a3a1e' },
+  { id: 'pizza', name: 'Pizza personal', desc: 'Pepperoni y mozzarella', price: 22000, mark: 'PZ', a: '#3a1414', b: '#7a2a2a' },
+  { id: 'ens', name: 'Ensalada César', desc: 'Pollo, lechuga y aderezo', price: 16000, mark: 'EC', a: '#15351f', b: '#2b6b3a' },
+  { id: 'papas', name: 'Papas rústicas', desc: 'Porción para compartir', price: 9000, mark: 'PR', a: '#3a2c0c', b: '#8a6514' },
+  { id: 'limo', name: 'Limonada natural', desc: 'Vaso 16 oz', price: 6000, mark: 'LN', a: '#1d2a10', b: '#4f6b1c' },
+  { id: 'brow', name: 'Brownie', desc: 'Con helado de vainilla', price: 8000, mark: 'BR', a: '#32142a', b: '#6b2a58' }
+];
+
+const $ = id => document.getElementById(id);
+const money = n => '$' + n.toLocaleString('es-CO');
+const cart = new Map();
+const findItem = id => menu.find(m => m.id === id);
+const cartTotal = () => [...cart.entries()].reduce((n, [id, q]) => n + findItem(id).price * q, 0);
+
+let orders = [
+  { id: 184, table: 3, status: 'preparando', time: 'hace 4 min', items: [{ id: 'burg', qty: 1 }, { id: 'papas', qty: 1 }, { id: 'limo', qty: 2 }] },
+  { id: 185, table: 5, status: 'listo', time: 'hace 7 min', items: [{ id: 'pizza', qty: 2 }, { id: 'limo', qty: 1 }] },
+  { id: 186, table: 1, status: 'preparando', time: 'hace 11 min', items: [{ id: 'ens', qty: 1 }, { id: 'limo', qty: 1 }] }
+];
+
+const statusLabel = { preparando: 'En preparación', listo: 'Listo', entregado: 'Entregado' };
+const statusClass = { preparando: 'is-warn', listo: 'is-ok', entregado: '' };
+const orderTotal = o => o.items.reduce((n, it) => n + findItem(it.id).price * it.qty, 0);
+
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function renderMenu() {
+  $('menu').innerHTML = menu.map(p => `
+    <button class="product" data-add="${p.id}" aria-label="Agregar ${p.name} a la comanda">
+      <span class="item-mark" style="--a:${p.a};--b:${p.b}">${p.mark}</span>
+      <span class="item-main"><b>${p.name}</b><small>${p.desc}</small></span>
+      <span class="price">${money(p.price)}</span>
+    </button>
+  `).join('');
+}
+
+function renderCart() {
+  const entries = [...cart.entries()];
+  const count = entries.reduce((n, [, q]) => n + q, 0);
+  $('count').textContent = count + (count === 1 ? ' ítem' : ' ítems');
+  $('total').textContent = money(cartTotal());
+
+  if (!entries.length) {
+    $('cart').innerHTML = '<div class="empty">Selecciona platos para armar la comanda.</div>';
+    return;
+  }
+
+  $('cart').innerHTML = entries.map(([id, q]) => {
+    const p = findItem(id);
+    return `
+      <div class="item">
+        <span class="item-mark" style="--a:${p.a};--b:${p.b}">${p.mark}</span>
+        <span class="item-main"><b>${p.name}</b><small>${money(p.price)} c/u</small></span>
+        <span class="qty">
+          <button data-dec="${id}" aria-label="Quitar uno de ${p.name}">−</button>
+          <span>${q}</span>
+          <button data-add="${id}" aria-label="Agregar uno de ${p.name}">+</button>
+        </span>
+        <span class="price">${money(p.price * q)}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderOrders() {
+  const active = orders.filter(o => o.status !== 'entregado').length;
+  $('orders-count').textContent = active + (active === 1 ? ' activa' : ' activas');
+
+  if (!orders.length) {
+    $('orders').innerHTML = '<div class="empty">No hay comandas todavía.</div>';
+    return;
+  }
+
+  $('orders').innerHTML = orders.map(o => {
+    const items = o.items.map(it => `<span>${it.qty}× ${findItem(it.id).name}</span>`).join('');
+    let action = '';
+    if (o.status === 'preparando') action = `<button class="btn btn-sm btn-soft" data-next="${o.id}">Marcar listo</button>`;
+    if (o.status === 'listo') action = `<button class="btn btn-sm btn-primary" data-next="${o.id}">Entregar</button>`;
+    return `
+      <article class="order-card" style="${o.status === 'entregado' ? 'opacity:.55' : ''}">
+        <div class="order-top">
+          <b>#${o.id} · Mesa ${o.table}</b>
+          <span class="badge ${statusClass[o.status]}">${statusLabel[o.status]}</span>
+        </div>
+        <div class="order-items">${items}</div>
+        <div class="order-foot"><small>${o.time}</small><span class="price">${money(orderTotal(o))}</span></div>
+        ${action}
+      </article>
+    `;
+  }).join('');
+}
+
+document.addEventListener('click', e => {
+  const add = e.target.closest('[data-add]');
+  const dec = e.target.closest('[data-dec]');
+  const next = e.target.closest('[data-next]');
+
+  if (add) {
+    const id = add.dataset.add;
+    cart.set(id, (cart.get(id) || 0) + 1);
+    renderCart();
+  }
+  if (dec) {
+    const id = dec.dataset.dec;
+    const q = (cart.get(id) || 0) - 1;
+    if (q > 0) cart.set(id, q);
+    else cart.delete(id);
+    renderCart();
+  }
+  if (next) {
+    const order = orders.find(o => o.id === Number(next.dataset.next));
+    if (!order) return;
+    if (order.status === 'preparando') {
+      order.status = 'listo';
+      toast(`Comanda #${order.id} lista para servir.`);
+    } else if (order.status === 'listo') {
+      order.status = 'entregado';
+      toast(`Comanda #${order.id} entregada en mesa ${order.table}.`);
+    }
+    renderOrders();
+  }
+});
+
+$('send').addEventListener('click', () => {
+  const table = $('table').value;
+  if (!table) return toast('Selecciona la mesa antes de enviar.');
+  if (!cart.size) return toast('Agrega al menos un plato a la comanda.');
+
+  const id = Math.max(...orders.map(o => o.id), 180) + 1;
+  const items = [...cart.entries()].map(([itemId, qty]) => ({ id: itemId, qty }));
+  orders.unshift({ id, table, status: 'preparando', time: 'ahora', items });
+
+  cart.clear();
+  $('table').value = '';
+  renderCart();
+  renderOrders();
+  toast(`Comanda #${id} enviada a cocina · Mesa ${table}.`);
+});
+
+$('clear').addEventListener('click', () => {
+  if (!cart.size) return toast('La comanda ya está vacía.');
+  cart.clear();
+  renderCart();
+  toast('Comanda vaciada.');
+});
+
+renderMenu();
+renderCart();
+renderOrders();
+</script>
+</body>
+</html>

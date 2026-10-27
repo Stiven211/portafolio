@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<title>Stockly · Inventario · Micro demo</title>
+<meta name="description" content="Micro demo de inventario: entradas, salidas, mínimos y alertas de bajo stock.">
+<link rel="stylesheet" href="../demo.css?v=1">
+</head>
+<body>
+<header class="demo-top">
+  <div class="demo-top-in">
+    <a class="demo-brand" href="../">
+      <span class="brand-mark">S</span>
+      <span><strong>Stiven</strong><small>Micro demos</small></span>
+    </a>
+    <div class="actions">
+      <a class="btn btn-sm btn-ghost hide-sm" href="../">Todos los demos</a>
+      <a class="btn btn-sm btn-ghost" href="../../index.html#demos">Portafolio</a>
+    </div>
+  </div>
+</header>
+
+<main class="demo-wrap">
+  <div class="demo-head">
+    <div>
+      <span class="pill"><span class="dot"></span>Micro demo · Operaciones</span>
+      <h1>Stockly</h1>
+      <p>Inventario de una cafetería. Registra entradas y salidas, controla el mínimo por producto y detecta faltantes antes de que duela.</p>
+    </div>
+    <span class="badge">Datos simulados</span>
+  </div>
+
+  <div class="app app-wide">
+    <section class="panel">
+      <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
+        <div class="stat"><b id="s-sku">0</b><span>Productos</span></div>
+        <div class="stat"><b id="s-units">0</b><span>Unidades</span></div>
+        <div class="stat"><b id="s-low">0</b><span>Bajo stock</span></div>
+      </div>
+
+      <div class="panel-head">
+        <h2>Inventario</h2>
+        <small>Los cambios se aplican al instante</small>
+      </div>
+
+      <div class="search" style="margin-bottom:12px">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+        <input id="search" type="search" placeholder="Buscar producto..." aria-label="Buscar producto">
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Producto</th><th>Stock</th><th>Mínimo</th><th>Precio</th><th style="text-align:right">Movimiento</th></tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+let products = [
+  { id: 1, name: 'Café en grano 500 g', stock: 12, min: 5, price: 32000 },
+  { id: 2, name: 'Leche entera 1 L', stock: 4, min: 8, price: 4500 },
+  { id: 3, name: 'Vasos 12 oz', stock: 80, min: 50, price: 300 },
+  { id: 4, name: 'Azúcar 1 kg', stock: 3, min: 4, price: 6200 },
+  { id: 5, name: 'Chocolate 500 g', stock: 9, min: 4, price: 18000 },
+  { id: 6, name: 'Servilletas', stock: 24, min: 10, price: 2500 }
+];
+
+const $ = id => document.getElementById(id);
+const money = n => '$' + n.toLocaleString('es-CO');
+
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function render() {
+  const q = $('search').value.trim().toLowerCase();
+  const visible = products.filter(p => p.name.toLowerCase().includes(q));
+
+  $('s-sku').textContent = products.length;
+  $('s-units').textContent = products.reduce((n, p) => n + p.stock, 0);
+  $('s-low').textContent = products.filter(p => p.stock <= p.min).length;
+
+  if (!visible.length) {
+    $('rows').innerHTML = '<tr><td colspan="5"><div class="empty">No hay productos con ese nombre.</div></td></tr>';
+    return;
+  }
+
+  $('rows').innerHTML = visible.map(p => {
+    const low = p.stock <= p.min;
+    return `
+      <tr>
+        <td><b>${p.name}</b></td>
+        <td>${p.stock} <span class="badge ${low ? 'is-bad' : 'is-ok'}">${low ? 'Bajo' : 'OK'}</span></td>
+        <td>${p.min}</td>
+        <td>${money(p.price)}</td>
+        <td>
+          <div class="actions-cell">
+            <button class="icon-btn" data-move="out" data-id="${p.id}" aria-label="Registrar salida de ${p.name}" ${p.stock === 0 ? 'disabled' : ''}>−</button>
+            <button class="icon-btn" data-move="in" data-id="${p.id}" aria-label="Registrar entrada de ${p.name}">+</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+$('search').addEventListener('input', render);
+
+document.addEventListener('click', e => {
+  const btn = e.target.closest('[data-move]');
+  if (!btn) return;
+  const product = products.find(p => p.id === Number(btn.dataset.id));
+  if (!product) return;
+
+  if (btn.dataset.move === 'in') {
+    product.stock += 1;
+    toast(`Entrada: ${product.name} · ${product.stock} unidades.`);
+  } else {
+    if (product.stock === 0) return toast('No hay unidades disponibles.');
+    product.stock -= 1;
+    toast(`Salida: ${product.name} · ${product.stock} unidades.`);
+  }
+
+  if (product.stock === product.min) toast(`Atención: ${product.name} llegó al mínimo (${product.min}).`);
+  render();
+});
+
+render();
+</script>
+</body>
+</html>

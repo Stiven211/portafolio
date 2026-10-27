@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<title>Asiste · Asistencia · Micro demo</title>
+<meta name="description" content="Micro demo de control de asistencia: presente, ausente o tarde, resumen y guardado local.">
+<link rel="stylesheet" href="../demo.css?v=1">
+<style>
+.att-item{flex-wrap:wrap}
+.att-item .state-group{width:100%;margin-left:41px}
+.att-item .state{flex:1}
+@media (max-width:640px){
+  .att-item .state-group{margin-left:0}
+}
+</style>
+</head>
+<body>
+<header class="demo-top">
+  <div class="demo-top-in">
+    <a class="demo-brand" href="../">
+      <span class="brand-mark">S</span>
+      <span><strong>Stiven</strong><small>Micro demos</small></span>
+    </a>
+    <div class="actions">
+      <a class="btn btn-sm btn-ghost hide-sm" href="../">Todos los demos</a>
+      <a class="btn btn-sm btn-ghost" href="../../index.html#demos">Portafolio</a>
+    </div>
+  </div>
+</header>
+
+<main class="demo-wrap">
+  <div class="demo-head">
+    <div>
+      <span class="pill"><span class="dot"></span>Micro demo · Educación</span>
+      <h1>Asiste</h1>
+      <p>Control de asistencia para un curso. Marca a cada estudiante, revisa el resumen y guarda la jornada en el navegador.</p>
+    </div>
+    <span class="badge">Datos simulados</span>
+  </div>
+
+  <div class="app">
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Curso 10°B</h2>
+        <small id="date"></small>
+      </div>
+      <div class="list" id="students"></div>
+    </section>
+
+    <aside class="stack">
+      <div class="panel">
+        <div class="panel-head"><h2>Resumen</h2><small id="pending"></small></div>
+        <div class="stat-grid" style="grid-template-columns:1fr 1fr">
+          <div class="stat"><b id="s-presente">0</b><span>Presentes</span></div>
+          <div class="stat"><b id="s-ausente">0</b><span>Ausentes</span></div>
+          <div class="stat"><b id="s-tarde">0</b><span>Tarde</span></div>
+          <div class="stat"><b id="s-sin">8</b><span>Sin marcar</span></div>
+        </div>
+        <div class="stack" style="margin-top:14px">
+          <button class="btn btn-primary btn-block" id="save">Guardar jornada</button>
+          <button class="btn btn-ghost btn-block" id="reset">Reiniciar marcas</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Último registro</h2><small>localStorage</small></div>
+        <p class="micro-note" id="saved">Sin jornadas guardadas todavía.</p>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const students = [
+  { id: 1, name: 'Ana Cárdenas', mark: 'AC', a: '#173a2c', b: '#256b4e' },
+  { id: 2, name: 'Brayan Díaz', mark: 'BD', a: '#2a1a3e', b: '#4c2f70' },
+  { id: 3, name: 'Camila Gutiérrez', mark: 'CG', a: '#3a2210', b: '#7a4a1e' },
+  { id: 4, name: 'Daniel Rojas', mark: 'DR', a: '#122f3e', b: '#225a70' },
+  { id: 5, name: 'Elena Torres', mark: 'ET', a: '#3a1424', b: '#7a2a4a' },
+  { id: 6, name: 'Felipe Mora', mark: 'FM', a: '#1d2a10', b: '#40561c' },
+  { id: 7, name: 'Laura Peña', mark: 'LP', a: '#2e1a10', b: '#6b3a1e' },
+  { id: 8, name: 'Mateo Vargas', mark: 'MV', a: '#1a1f3a', b: '#333f7a' }
+];
+
+const KEY = 'asiste-10b';
+const states = {};
+const $ = id => document.getElementById(id);
+const today = new Date();
+const todayKey = today.toISOString().slice(0, 10);
+const labels = { presente: 'Presente', ausente: 'Ausente', tarde: 'Tarde' };
+
+$('date').textContent = today.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
+
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function render() {
+  $('students').innerHTML = students.map(s => `
+    <div class="item att-item">
+      <span class="item-mark" style="--a:${s.a};--b:${s.b}">${s.mark}</span>
+      <span class="item-main"><b>${s.name}</b><small>10°B · Jornada mañana</small></span>
+      <span class="state-group">
+        <button class="state ${states[s.id] === 'presente' ? 'is-presente' : ''}" data-id="${s.id}" data-state="presente">Presente</button>
+        <button class="state ${states[s.id] === 'ausente' ? 'is-ausente' : ''}" data-id="${s.id}" data-state="ausente">Ausente</button>
+        <button class="state ${states[s.id] === 'tarde' ? 'is-tarde' : ''}" data-id="${s.id}" data-state="tarde">Tarde</button>
+      </span>
+    </div>
+  `).join('');
+
+  const count = state => students.filter(s => states[s.id] === state).length;
+  $('s-presente').textContent = count('presente');
+  $('s-ausente').textContent = count('ausente');
+  $('s-tarde').textContent = count('tarde');
+  const sin = students.length - Object.keys(states).length;
+  $('s-sin').textContent = sin;
+  $('pending').textContent = sin ? sin + ' sin marcar' : 'Curso completo';
+}
+
+document.addEventListener('click', e => {
+  const btn = e.target.closest('[data-id]');
+  if (!btn) return;
+  states[btn.dataset.id] = btn.dataset.state;
+  render();
+});
+
+$('save').addEventListener('click', () => {
+  if (!Object.keys(states).length) return toast('Marca al menos un estudiante antes de guardar.');
+  const record = { date: todayKey, states };
+  localStorage.setItem(KEY, JSON.stringify(record));
+  $('saved').textContent = `Jornada del ${today.toLocaleDateString('es-CO')} guardada: ${Object.keys(states).length} de ${students.length} estudiantes marcados.`;
+  toast('Jornada guardada en este navegador.');
+});
+
+$('reset').addEventListener('click', () => {
+  students.forEach(s => delete states[s.id]);
+  render();
+  toast('Marcas reiniciadas.');
+});
+
+try {
+  const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+  if (saved && saved.date === todayKey) {
+    Object.assign(states, saved.states || {});
+    $('saved').textContent = `Jornada del ${today.toLocaleDateString('es-CO')} recuperada: ${Object.keys(states).length} de ${students.length} estudiantes.`;
+  } else if (saved) {
+    $('saved').textContent = `Última jornada guardada: ${saved.date.split('-').reverse().join('/')}.`;
+  }
+} catch (err) {}
+
+render();
+</script>
+</body>
+</html>

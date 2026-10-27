@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<title>Norte · Agenda · Micro demo</title>
+<meta name="description" content="Micro demo de agenda de citas: servicio, fecha, hora y control de espacios.">
+<link rel="stylesheet" href="../demo.css?v=1">
+</head>
+<body>
+<header class="demo-top">
+  <div class="demo-top-in">
+    <a class="demo-brand" href="../">
+      <span class="brand-mark">S</span>
+      <span><strong>Stiven</strong><small>Micro demos</small></span>
+    </a>
+    <div class="actions">
+      <a class="btn btn-sm btn-ghost hide-sm" href="../">Todos los demos</a>
+      <a class="btn btn-sm btn-ghost" href="../../index.html#demos">Portafolio</a>
+    </div>
+  </div>
+</header>
+
+<main class="demo-wrap">
+  <div class="demo-head">
+    <div>
+      <span class="pill"><span class="dot"></span>Micro demo · Servicios</span>
+      <h1>Norte Barber</h1>
+      <p>Agenda de citas para barbería. Elige servicio, fecha y hora; los espacios ocupados se bloquean automáticamente.</p>
+    </div>
+    <span class="badge">Datos simulados</span>
+  </div>
+
+  <div class="app">
+    <section class="panel">
+      <div class="panel-head"><h2>Nueva cita</h2><small>Agenda del día</small></div>
+      <form id="form" class="stack" autocomplete="off">
+        <div class="row">
+          <div class="field">
+            <label for="name">Cliente</label>
+            <input id="name" type="text" placeholder="Nombre completo" required>
+          </div>
+          <div class="field">
+            <label for="phone">Teléfono</label>
+            <input id="phone" type="tel" placeholder="300 000 0000">
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="service">Servicio</label>
+            <select id="service">
+              <option value="corte">Corte clásico · $25.000 · 30 min</option>
+              <option value="corte-barba">Corte + barba · $35.000 · 50 min</option>
+              <option value="barba">Perfilado de barba · $15.000 · 20 min</option>
+              <option value="cejas">Cejas · $8.000 · 15 min</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="date">Fecha</label>
+            <input id="date" type="date" required>
+          </div>
+        </div>
+        <div class="field">
+          <label>Hora disponible</label>
+          <div class="slots" id="slots"></div>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Agendar cita</button>
+      </form>
+    </section>
+
+    <aside class="stack">
+      <div class="panel">
+        <div class="panel-head"><h2>Resumen</h2><small>Agenda completa</small></div>
+        <div class="stat-grid">
+          <div class="stat"><b id="s-total">0</b><span>Citas</span></div>
+          <div class="stat"><b id="s-today">0</b><span>Hoy</span></div>
+          <div class="stat"><b id="s-income">$0</b><span>Ingresos</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Citas agendadas</h2><small id="list-count">0</small></div>
+        <div class="list" id="list"></div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const services = {
+  corte: { name: 'Corte clásico', price: 25000 },
+  'corte-barba': { name: 'Corte + barba', price: 35000 },
+  barba: { name: 'Perfilado de barba', price: 15000 },
+  cejas: { name: 'Cejas', price: 8000 }
+};
+
+const slots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+const $ = id => document.getElementById(id);
+const money = n => '$' + n.toLocaleString('es-CO');
+const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const today = new Date();
+const todayKey = iso(today);
+
+let appointments = [
+  { id: 1, name: 'Sofía Martín', phone: '310 555 0182', service: 'corte-barba', date: todayKey, time: '10:00' },
+  { id: 2, name: 'Andrés Ruiz', phone: '301 444 9271', service: 'corte', date: todayKey, time: '14:00' }
+];
+let selectedTime = null;
+
+$('date').value = todayKey;
+$('date').min = todayKey;
+
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function renderSlots() {
+  const date = $('date').value;
+  const taken = new Set(appointments.filter(a => a.date === date).map(a => a.time));
+  if (selectedTime && taken.has(selectedTime)) selectedTime = null;
+  $('slots').innerHTML = slots.map(time => `
+    <button type="button" class="slot ${selectedTime === time ? 'is-active' : ''}" data-time="${time}" ${taken.has(time) ? 'disabled' : ''}>${time}</button>
+  `).join('');
+}
+
+function render() {
+  const total = appointments.length;
+  const todayCount = appointments.filter(a => a.date === todayKey).length;
+  const income = appointments.reduce((n, a) => n + services[a.service].price, 0);
+  $('s-total').textContent = total;
+  $('s-today').textContent = todayCount;
+  $('s-income').textContent = money(income);
+  $('list-count').textContent = total + (total === 1 ? ' cita' : ' citas');
+
+  if (!total) {
+    $('list').innerHTML = '<div class="empty">No hay citas agendadas.</div>';
+    return;
+  }
+
+  const sorted = [...appointments].sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+  $('list').innerHTML = sorted.map(a => {
+    const [y, m, d] = a.date.split('-');
+    const label = `${d}/${m}/${y}`;
+    return `
+      <div class="item">
+        <span class="item-mark" style="--a:#3a2408;--b:#6b4410">${a.time.slice(0, 2)}</span>
+        <span class="item-main">
+          <b>${a.name}</b>
+          <small>${services[a.service].name} · ${label} · ${a.time}</small>
+        </span>
+        <span class="price">${money(services[a.service].price)}</span>
+        <button class="icon-btn" data-cancel="${a.id}" aria-label="Cancelar cita de ${a.name}">×</button>
+      </div>
+    `;
+  }).join('');
+}
+
+document.addEventListener('click', e => {
+  const slot = e.target.closest('[data-time]');
+  if (slot) {
+    selectedTime = slot.dataset.time;
+    renderSlots();
+  }
+  const cancel = e.target.closest('[data-cancel]');
+  if (cancel) {
+    const id = Number(cancel.dataset.cancel);
+    const appt = appointments.find(a => a.id === id);
+    appointments = appointments.filter(a => a.id !== id);
+    render();
+    renderSlots();
+    toast(`Cita de ${appt.name} cancelada.`);
+  }
+});
+
+$('date').addEventListener('change', () => {
+  selectedTime = null;
+  renderSlots();
+});
+
+$('form').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = $('name').value.trim();
+  const date = $('date').value;
+  if (!name) return toast('Escribe el nombre del cliente.');
+  if (!date) return toast('Selecciona una fecha.');
+  if (!selectedTime) return toast('Selecciona una hora disponible.');
+  if (appointments.some(a => a.date === date && a.time === selectedTime)) {
+    selectedTime = null;
+    renderSlots();
+    return toast('Ese espacio acaba de ocuparse. Elige otra hora.');
+  }
+
+  appointments.push({
+    id: Date.now(),
+    name,
+    phone: $('phone').value.trim(),
+    service: $('service').value,
+    date,
+    time: selectedTime
+  });
+
+  const booked = selectedTime;
+  $('name').value = '';
+  $('phone').value = '';
+  selectedTime = null;
+  render();
+  renderSlots();
+  toast(`Cita agendada para ${name} a las ${booked}.`);
+});
+
+renderSlots();
+render();
+</script>
+</body>
+</html>

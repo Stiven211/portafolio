@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<title>PuntoGo · POS · Micro demo</title>
+<meta name="description" content="Micro demo de punto de venta: productos, carrito, total y cierre de venta.">
+<link rel="stylesheet" href="../demo.css?v=1">
+</head>
+<body>
+<header class="demo-top">
+  <div class="demo-top-in">
+    <a class="demo-brand" href="../">
+      <span class="brand-mark">S</span>
+      <span><strong>Stiven</strong><small>Micro demos</small></span>
+    </a>
+    <div class="actions">
+      <a class="btn btn-sm btn-ghost hide-sm" href="../">Todos los demos</a>
+      <a class="btn btn-sm btn-ghost" href="../../index.html#demos">Portafolio</a>
+    </div>
+  </div>
+</header>
+
+<main class="demo-wrap">
+  <div class="demo-head">
+    <div>
+      <span class="pill"><span class="dot"></span>Micro demo · POS</span>
+      <h1>PuntoGo</h1>
+      <p>Punto de venta para cafetería. Agrega productos, ajusta cantidades, elige el método de pago y cierra la venta.</p>
+    </div>
+    <span class="badge">Datos simulados</span>
+  </div>
+
+  <div class="app">
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Productos</h2>
+        <small>6 disponibles</small>
+      </div>
+      <div class="product-grid" id="products"></div>
+    </section>
+
+    <aside class="panel">
+      <div class="panel-head">
+        <h2>Ticket</h2>
+        <small id="count">0 ítems</small>
+      </div>
+      <div class="list" id="cart"></div>
+      <div class="total">
+        <span>Total</span>
+        <b id="total">$0</b>
+      </div>
+      <div class="stack" style="margin-top:14px">
+        <div class="field">
+          <label for="pay">Método de pago</label>
+          <select id="pay">
+            <option>Efectivo</option>
+            <option>Tarjeta</option>
+            <option>Transferencia</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-block" id="charge">Cobrar venta</button>
+        <button class="btn btn-ghost btn-block" id="clear">Vaciar ticket</button>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const products = [
+  { id: 'cafe', name: 'Café americano', desc: 'Bebida caliente', price: 5000, mark: 'CA', a: '#3a2a12', b: '#6b4a1c' },
+  { id: 'capu', name: 'Capuchino', desc: 'Bebida caliente', price: 7500, mark: 'CP', a: '#3a2418', b: '#7a4726' },
+  { id: 'cros', name: 'Croissant', desc: 'Panadería', price: 6000, mark: 'CR', a: '#3a2c0c', b: '#8a6514' },
+  { id: 'jugo', name: 'Jugo natural', desc: 'Bebida fría', price: 8000, mark: 'JU', a: '#15351f', b: '#2b6b3a' },
+  { id: 'sand', name: 'Sándwich', desc: 'Comida', price: 12000, mark: 'SA', a: '#3a1515', b: '#7a2a2a' },
+  { id: 'brow', name: 'Brownie', desc: 'Postre', price: 7000, mark: 'BR', a: '#32142a', b: '#6b2a58' }
+];
+
+const money = n => '$' + n.toLocaleString('es-CO');
+const cart = new Map();
+const $ = id => document.getElementById(id);
+
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function renderProducts() {
+  $('products').innerHTML = products.map(p => `
+    <button class="product" data-add="${p.id}" aria-label="Agregar ${p.name}">
+      <span class="item-mark" style="--a:${p.a};--b:${p.b}">${p.mark}</span>
+      <span class="item-main"><b>${p.name}</b><small>${p.desc}</small></span>
+      <span class="price">${money(p.price)}</span>
+    </button>
+  `).join('');
+}
+
+function renderCart() {
+  const entries = [...cart.entries()];
+  const count = entries.reduce((n, [, q]) => n + q, 0);
+  const total = entries.reduce((n, [id, q]) => n + products.find(p => p.id === id).price * q, 0);
+  $('count').textContent = count + (count === 1 ? ' ítem' : ' ítems');
+  $('total').textContent = money(total);
+
+  if (!entries.length) {
+    $('cart').innerHTML = '<div class="empty">El ticket está vacío. Toca un producto para comenzar.</div>';
+    return;
+  }
+
+  $('cart').innerHTML = entries.map(([id, q]) => {
+    const p = products.find(x => x.id === id);
+    return `
+      <div class="item">
+        <span class="item-mark" style="--a:${p.a};--b:${p.b}">${p.mark}</span>
+        <span class="item-main"><b>${p.name}</b><small>${money(p.price)} c/u</small></span>
+        <span class="qty">
+          <button data-dec="${id}" aria-label="Quitar uno de ${p.name}">−</button>
+          <span>${q}</span>
+          <button data-add="${id}" aria-label="Agregar uno de ${p.name}">+</button>
+        </span>
+        <span class="price">${money(p.price * q)}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+document.addEventListener('click', e => {
+  const add = e.target.closest('[data-add]');
+  const dec = e.target.closest('[data-dec]');
+  if (add) {
+    const id = add.dataset.add;
+    cart.set(id, (cart.get(id) || 0) + 1);
+    renderCart();
+  }
+  if (dec) {
+    const id = dec.dataset.dec;
+    const next = (cart.get(id) || 0) - 1;
+    if (next > 0) cart.set(id, next);
+    else cart.delete(id);
+    renderCart();
+  }
+});
+
+$('charge').addEventListener('click', () => {
+  if (!cart.size) return toast('Agrega al menos un producto para cobrar.');
+  const total = [...cart.entries()].reduce((n, [id, q]) => n + products.find(p => p.id === id).price * q, 0);
+  const ref = 'PG-' + String(Math.floor(1000 + Math.random() * 9000));
+  cart.clear();
+  renderCart();
+  toast(`Venta cobrada · ${money(total)} · ${$('pay').value} · ${ref}`);
+});
+
+$('clear').addEventListener('click', () => {
+  if (!cart.size) return toast('El ticket ya está vacío.');
+  cart.clear();
+  renderCart();
+  toast('Ticket vaciado.');
+});
+
+renderProducts();
+renderCart();
+</script>
+</body>
+</html>

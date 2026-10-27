@@ -31,8 +31,10 @@ Laboratorio completo: https://stiven211.github.io/portafolio/micro-demos/
 
 El formulario usa FormSubmit para enviar a `kurregorojas@gmail.com` sin backend.
 La primera vez hay que confirmar el correo de activación que llega a esa bandeja.
-Incluye captcha, campo honeypot, validación en el navegador y consentimiento
-explícito con aviso de uso de datos.
+Incluye campo honeypot, validación en el navegador, filtro anti-spam del
+servicio y consentimiento explícito con aviso de uso de datos. El captcha de
+FormSubmit está desactivado para evitar su pantalla intermedia; si empieza a
+llegar spam, la solución es migrar a un endpoint propio con Turnstile.
 
 La API key de Resend no se incluye en el frontend. GitHub Secrets solo está
 disponible para workflows, no para el navegador; si se usa Resend hace falta una

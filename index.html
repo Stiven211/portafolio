@@ -591,6 +591,62 @@ h2{
 .form-status.is-error{display:block;color:#ffb3bc;background:rgba(255,107,122,.1);border-color:rgba(255,107,122,.3)}
 .hp{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
 
+.consent{display:flex;align-items:flex-start;gap:9px}
+.contact-form .consent input[type=checkbox]{
+  width:15px;height:15px;min-height:0;flex:none;
+  margin-top:2px;padding:0;
+  accent-color:var(--mint);
+  border-radius:4px;
+  cursor:pointer;
+}
+.consent-text{font-size:11px;line-height:1.6;color:var(--muted-2)}
+.consent-text label{cursor:pointer}
+body:has(.privacy-modal[open]){overflow:hidden}
+.privacy-link{
+  display:inline;
+  padding:0;margin:0;
+  color:var(--mint);
+  font:inherit;
+  font-weight:600;
+  text-decoration:underline;
+  text-underline-offset:2px;
+  cursor:pointer;
+}
+.privacy-link:hover{color:#9ffbe4}
+
+.privacy-modal{
+  width:calc(100% - 36px);
+  max-width:520px;
+  max-height:86vh;
+  overflow:auto;
+  padding:0;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:18px;
+  background:#0e1018;
+  color:var(--text);
+  box-shadow:0 30px 80px rgba(0,0,0,.65);
+}
+.privacy-modal::backdrop{background:rgba(3,4,8,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.privacy-card{padding:22px}
+.privacy-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.privacy-head h3{font-family:var(--font-d);font-size:18px;font-weight:600;letter-spacing:-.02em}
+.privacy-close{
+  width:30px;height:30px;
+  display:grid;place-items:center;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:8px;
+  background:rgba(255,255,255,.04);
+  color:var(--muted);
+  font-size:17px;
+  line-height:1;
+}
+.privacy-close:hover{color:var(--text);background:rgba(255,255,255,.08)}
+.privacy-card p{color:var(--muted);font-size:12.5px;line-height:1.65;margin:0 0 12px}
+.privacy-card ul{display:flex;flex-direction:column;gap:7px;margin:0 0 12px;padding-left:16px}
+.privacy-card li{color:var(--muted);font-size:12px;line-height:1.6}
+.privacy-card li b{color:var(--text);font-weight:600}
+.privacy-card a{color:var(--mint);text-decoration:underline;text-underline-offset:2px}
+
 .site-footer{border-top:1px solid var(--line);padding:34px 0 40px;margin-top:20px}
 .footer-inner{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
 .footer-left{display:flex;align-items:center;gap:12px;font-size:12.5px;color:var(--muted-2)}
@@ -1043,6 +1099,13 @@ html.js [data-reveal].in{opacity:1;transform:none}
             <label for="contact-message">Mensaje</label>
             <textarea id="contact-message" name="message" rows="4" minlength="20" placeholder="Cuéntame qué necesitas, para cuándo y qué presupuesto tienes..." required></textarea>
           </div>
+          <div class="consent">
+            <input id="contact-consent" name="consentimiento" type="checkbox" value="si" required>
+            <div class="consent-text">
+              <label for="contact-consent">Autorizo el uso de estos datos para recibir contacto sobre esta solicitud.</label>
+              <button type="button" class="privacy-link" id="privacy-open" aria-haspopup="dialog" aria-controls="privacy-modal">Ver información sobre los datos</button>
+            </div>
+          </div>
           <input class="hp" type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true">
           <input type="hidden" name="_subject" value="Nuevo mensaje desde el portafolio">
           <input type="hidden" name="_template" value="table">
@@ -1054,6 +1117,25 @@ html.js [data-reveal].in{opacity:1;transform:none}
           <div class="form-status" id="form-status" role="status" aria-live="polite"></div>
         </form>
       </div>
+
+      <dialog class="privacy-modal" id="privacy-modal" aria-labelledby="privacy-title">
+        <div class="privacy-card">
+          <div class="privacy-head">
+            <h3 id="privacy-title">Uso de tus datos</h3>
+            <button class="privacy-close" type="button" id="privacy-close" aria-label="Cerrar">&times;</button>
+          </div>
+          <p>Estos datos se usan únicamente para responder tu solicitud y coordinar el proyecto. No se venden ni se comparten con terceros para publicidad.</p>
+          <ul>
+            <li><b>Responsable:</b> Kevin Stiven Urrego Rojas · kurregorojas@gmail.com</li>
+            <li><b>Datos:</b> nombre, correo, tipo de proyecto y mensaje.</li>
+            <li><b>Finalidad:</b> responder la solicitud y hacer seguimiento de la conversación.</li>
+            <li><b>Conservación:</b> durante la conversación y hasta 12 meses después, salvo obligación legal.</li>
+            <li><b>Proveedor:</b> FormSubmit procesa el envío y Gmail recibe el mensaje.</li>
+            <li><b>Derechos:</b> puedes solicitar acceso, corrección o eliminación escribiendo al correo.</li>
+          </ul>
+          <p>Puedes retirar la autorización en cualquier momento escribiendo a <a href="mailto:kurregorojas@gmail.com">kurregorojas@gmail.com</a>.</p>
+        </div>
+      </dialog>
     </div>
   </section>
 </main>
@@ -1154,6 +1236,16 @@ if (contactForm) {
     }
     submit.disabled = true;
     submit.textContent = 'Enviando...';
+  });
+}
+
+const privacyModal = document.getElementById('privacy-modal');
+const privacyOpen = document.getElementById('privacy-open');
+if (privacyModal && privacyOpen) {
+  privacyOpen.addEventListener('click', () => privacyModal.showModal());
+  document.getElementById('privacy-close').addEventListener('click', () => privacyModal.close());
+  privacyModal.addEventListener('click', (e) => {
+    if (e.target === privacyModal) privacyModal.close();
   });
 }
 

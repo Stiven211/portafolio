@@ -31,10 +31,12 @@ Laboratorio completo: https://stiven211.github.io/portafolio/micro-demos/
 
 El formulario usa FormSubmit para enviar a `kurregorojas@gmail.com` sin backend.
 La primera vez hay que confirmar el correo de activación que llega a esa bandeja.
-Incluye captcha, campo honeypot y validación en el navegador.
+Incluye captcha, campo honeypot, validación en el navegador y consentimiento
+explícito con aviso de uso de datos.
 
-La API key de Resend no se incluye en el frontend. Para usarla hay que crear una
-función serverless y guardarla como variable de entorno.
+La API key de Resend no se incluye en el frontend. GitHub Secrets solo está
+disponible para workflows, no para el navegador; si se usa Resend hace falta una
+función serverless (Vercel/Cloudflare) con la key en una variable de entorno.
 
 ## Stack
 
